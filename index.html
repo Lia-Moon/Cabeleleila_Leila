@@ -5,11 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cabeleleila Leila Salão de Beleiza</title>
     <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/reset.css">
+    <link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
-    
+    <form class="acesso">
+        <div class="acesso__login--CPF">
+            <label for="acesso__login--CPF">CPF:</label>
+            <input type="number" class="form-control" id="acesso__login--CPF" aria-describedby="CPF__info" placeholder="Digite seu CPF">
+            <small id="CPF__info" class="form-text text-muted">Digite somente números.</small>
+        </div>
+        <div class="acesso__login--senha">
+            <label for="acesso__login--Senha">Senha:</label>
+            <input type="password" class="form-control" id="acesso__login--Senha" placeholder="Senha">
+        </div>
+        <button type="submit" class="btn btn-outline-dark">Acessar</button>
+    </form>
 </body>
-<script src="renderer.js"></script>
+<script src="script/renderer.js"></script>
 <script src="node_modules/jquery/dist/jquery.min.js"></script>
 <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </html>

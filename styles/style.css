@@ -1,0 +1,13 @@
+
+.acesso {
+    padding: 10%;
+    max-width: 700px;
+}
+
+.acesso button {
+    margin-top: 10px;
+}
+
+.acesso__login--senha {
+    margin-top: 10px;
+}

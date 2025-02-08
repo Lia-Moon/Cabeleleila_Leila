@@ -1,7 +1,7 @@
 {
   "name": "cabeleleila_leila",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "script/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron ."
@@ -23,6 +23,9 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
-    "jquery": "^3.7.1"
-  }
+    "jquery": "^3.7.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  },
+  "type": "module"
 }
