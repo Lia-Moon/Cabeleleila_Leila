@@ -55,11 +55,11 @@ async function deletarRegistro(USUARIOID) {
     console.log(`Registro com ID ${USUARIOID} deletado com sucesso.`);
   }
   
-// deletarRegistro(2);  // Deletar o registro com o ID 1
+// deletarRegistro(2);  // Deletar o registro com o ID
 
 criarTabelaUsuarios();
 
 // NOME, TELEFONE, CPF, SENHA
-inserirRegistroTabelaUsuarios('LEILA', '9827504594', '05270659948', 'SENHA112233');
-inserirRegistroTabelaUsuarios('AGUSTA', '65993168625', '71690665645', 'BOLINHO');
-inserirRegistroTabelaUsuarios('EMILY', '51983540418', '32459125526', '112233');
+// inserirRegistroTabelaUsuarios('LEILA', '9827504594', '05270659948', 'SENHA112233');
+// inserirRegistroTabelaUsuarios('AGUSTA', '65993168625', '71690665645', 'BOLINHO');
+// inserirRegistroTabelaUsuarios('EMILY', '51983540418', '32459125526', '112233');
