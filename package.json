@@ -1,0 +1,28 @@
+{
+  "name": "cabeleleila_leila",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lia-Moon/Cabeleleila_Leila.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Lia-Moon/Cabeleleila_Leila/issues"
+  },
+  "homepage": "https://github.com/Lia-Moon/Cabeleleila_Leila#readme",
+  "description": "",
+  "devDependencies": {
+    "electron": "^34.1.1"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "jquery": "^3.7.1"
+  }
+}
