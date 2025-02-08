@@ -38,10 +38,31 @@
             <input type="checkbox" class="custom-control-input" id="tintura">
             <label class="custom-control-label" for="tintura">Tintura</label>
         </div>
-        <p>Escolha um horário</p>
+        <div class="opcoes__servicos--corte__feminino">
+            <p>Escolha um horário para o Corte Feminino</p>
+            <input type="text" id="datepickerfeminino" class="datepicker">
+            <input type="time" class="escolha__horario" id="horariofeminino" name="horario" min="08:00" max="18:00">
+        </div>
+        <div class="opcoes__servicos--corte__masculino">
+            <p>Escolha um horário para o Corte Masculino</p>
+            <input type="text" id="datepickermasculino" class="datepicker">
+            <input type="time" class="escolha__horario" id="horariomasculino" name="horario" min="09:00" max="18:00">
+            
+        </div>
+        <div class="opcoes__servicos--tintura">
+            <p>Escolha um horário para a Tintura</p>
+            <input type="text" id="datepickertintura" class="datepicker">
+            <input type="time" class="escolha__horario" id="horariotintura" name="horario" min="09:00" max="18:00">
+        </div>
+        <small class="horario__incorreto">Por favor selecione um horário dentro do período das 08h às 18h.</small>
+        <br>
+        <button type="button" class="btn btn-outline-dark">Agendar</button>
     </div>
+    
 </body>
 <script src="node_modules/jquery/dist/jquery.min.js"></script>
 <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="node_modules/jquery-ui/ui/widgets/datepicker.js"></script>
+<script src="src/js/i18n/jquery.ui.datepicker-pt-BR.js"></script>
 <script src="./script/renderer.js"></script>
 </html>

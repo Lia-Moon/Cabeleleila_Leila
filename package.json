@@ -24,6 +24,7 @@
   "dependencies": {
     "bootstrap": "^5.3.3",
     "jquery": "^3.7.1",
+    "jquery-ui": "^1.14.1",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7"
   },

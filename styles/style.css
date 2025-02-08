@@ -29,3 +29,23 @@
 .opcoes__servicos p {
     padding-top: 15px;
 }
+
+.horario__incorreto {
+    color: red;
+}
+
+.ui-datepicker {
+    background-color: white; /* Define um fundo branco */
+    border: 1px solid #ccc; /* Adiciona uma borda sutil */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); /* Efeito de sombra opcional */
+    padding: 5px;
+    display: none;
+}
+
+.ui-datepicker-prev, .ui-datepicker-next {
+    margin: 0 10px; 
+}
+
+.opcoes__servicos button {
+    margin-top: 15px;
+}
