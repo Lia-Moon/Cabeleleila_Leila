@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabeleleila Leila Salão de Beleiza</title>
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/reset.css">
+    <link rel="stylesheet" href="./styles/style.css">
+</head>
+<body>
+    <div class="menu__header">
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-secondary">
+                <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off"> Agendar
+            </label>
+            <label class="btn btn-secondary">
+                <input type="radio" name="opcao" id="paginaProximos" autocomplete="off"> Próximos Agendamentos
+            </label>
+            <label class="btn btn-secondary active">
+                <input type="radio" name="opcao" id="paginaHistorico" autocomplete="off" checked> Histórico
+            </label>
+        </div>
+    </div>
+</body>
+<script src="node_modules/jquery/dist/jquery.min.js"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="./script/renderer.js"></script>
+</html>
