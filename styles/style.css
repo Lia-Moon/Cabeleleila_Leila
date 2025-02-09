@@ -53,3 +53,13 @@
 .opcoes__servicos button {
     margin-top: 15px;
 }
+
+/* ---- Página Próximos Agendamentos ---- */
+.listagem__agendamentos {
+    margin: 1% 5%;
+    max-width: 80%;
+}
+
+.list-group{
+    margin-top: 3%;
+}

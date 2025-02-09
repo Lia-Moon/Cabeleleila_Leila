@@ -40,7 +40,7 @@ async function criarTabelaUsuarios() {
 
     // await db.run('DROP TABLE IF EXISTS USUARIO'); // Deleta a tabela de usuário
 
-    db.run(`CREATE TABLE IF NOT EXISTS USUARIO (
+    await db.run(`CREATE TABLE IF NOT EXISTS USUARIO (
         USUARIOID INTEGER NOT NULL PRIMARY KEY, 
         USUARIONOME VARCHAR(15) NOT NULL, 
         USUARIOTEL TEXT NOT NULL,
@@ -92,28 +92,28 @@ async function criarTabelaAgendamento() {
 
     // await db.run('DROP TABLE IF EXISTS AGENDAMENTO'); // Deleta a tabela de Agendamento
 
-    db.run(`CREATE TABLE IF NOT EXISTS AGENDAMENTO (
+    await  db.run(`CREATE TABLE IF NOT EXISTS AGENDAMENTO (
         AGENDAMENTOID INTEGER NOT NULL PRIMARY KEY, 
-        AGENDAMENTONOME VARCHAR(15) NOT NULL, 
+        AGENDAMENTOCPF TEXT NOT NULL,
         AGENDAMENTODATA DATE NOT NULL,
         AGENDAMENTOHORA TIME NOT NULL,
         AGENDAMENTOSERVICO VARCHAR(10) NOT NULL
     )`);  
 }
 
-async function inserirRegistroTabelaAgendamento(AGENDAMENTONOME, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO) {
+async function inserirRegistroTabelaAgendamento(AGENDAMENTOCPF, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO) {
     const db = await open({
         filename: 'banco/banco.db',
         driver: sqlite3.Database,
     });
     
-    await db.run('INSERT INTO AGENDAMENTO (AGENDAMENTONOME, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO) VALUES (?,?,?,?)', [
-        AGENDAMENTONOME,
+    await db.run('INSERT INTO AGENDAMENTO (AGENDAMENTOCPF, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO) VALUES (?,?,?,?)', [
+        AGENDAMENTOCPF,
         AGENDAMENTODATA,
         AGENDAMENTOHORA,
         AGENDAMENTOSERVICO,
     ]);
-    console.log(`Registro com NOME ${AGENDAMENTONOME} DATA ${AGENDAMENTODATA} HORA ${AGENDAMENTOHORA} SERVICO ${AGENDAMENTOSERVICO} inserido com sucesso.`);
+    console.log(`Registro com CPF ${AGENDAMENTOCPF} DATA ${AGENDAMENTODATA} HORA ${AGENDAMENTOHORA} SERVICO ${AGENDAMENTOSERVICO} inserido com sucesso.`);
 }
 
 async function deletarRegistroTabelaAgendamento(AGENDAMENTOID) {
@@ -127,17 +127,18 @@ async function deletarRegistroTabelaAgendamento(AGENDAMENTOID) {
 
 criarTabelaAgendamento();
 
-async function inserirAgendamento(nome, date, hora, servico) {
+async function inserirAgendamento(usuario, data, hora, servico) {
     const db = await open({
         filename: 'banco/banco.db',
         driver: sqlite3.Database,
     });
 
-    inserirRegistroTabelaAgendamento(nome, date, hora, servico);
+    console.log("Inserindo agendamento:", usuario, data, hora, servico);
+    inserirRegistroTabelaAgendamento(usuario, data, hora, servico);
 }
 
-ipcMain.handle('inserirAgendamento', async (event, nome, data, hora, servico) => {
-    return await inserirAgendamento(nome, data, hora, servico);
+ipcMain.handle('inserirAgendamento', async (event, usuario, data, hora, servico) => {
+    return await inserirAgendamento(usuario, data, hora, servico);
 });
 
 // -------------- Pesquisar Usuário
@@ -159,4 +160,37 @@ ipcMain.handle('buscarUsuario', async (event, USUARIOCPF, USUARIOSENHA) => {
     return await verificarUsuario(USUARIOCPF, USUARIOSENHA);
 });
 
+// -------------- Verifica se existe agendamento
+
+async function procuraAgendamento(AGENDAMENTOCPF) {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    console.log("Buscando agendamento para:", AGENDAMENTOCPF);
+
+    const busca = `SELECT * FROM AGENDAMENTO WHERE AGENDAMENTOCPF = ? AND ((AGENDAMENTODATA > DATE('now') ) OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA >= TIME('now')))`;
+    const retornoBusca = await db.all(busca, [AGENDAMENTOCPF]);
+
+    console.log("Retorno da busca: ", retornoBusca);
+
+    if(retornoBusca && retornoBusca.length > 0) {
+        const agendamentosEncontrados = retornoBusca.map(item => {
+            return {nome: item.AGENDAMENTOCPF, 
+                data: item.AGENDAMENTODATA,
+                hora: item.AGENDAMENTOHORA, 
+                servico: item.AGENDAMENTOSERVICO};
+        });
+        return agendamentosEncontrados;
+    } else {
+        return null;
+    }
+}
+
+ipcMain.handle('existeAgendamento', async (event, AGENDAMENTOCPF) => {
+    const resultado =  await procuraAgendamento(AGENDAMENTOCPF);
+    console.log("Resultado da busca no banco:", resultado);
+    return resultado;
+});
 
