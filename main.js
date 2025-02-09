@@ -97,7 +97,7 @@ async function criarTabelaAgendamento() {
         AGENDAMENTOCPF TEXT NOT NULL,
         AGENDAMENTODATA DATE NOT NULL,
         AGENDAMENTOHORA TIME NOT NULL,
-        AGENDAMENTOSERVICO VARCHAR(10) NOT NULL
+        AGENDAMENTOSERVICO VARCHAR(20) NOT NULL
     )`);  
 }
 
@@ -133,7 +133,6 @@ async function inserirAgendamento(usuario, data, hora, servico) {
         driver: sqlite3.Database,
     });
 
-    console.log("Inserindo agendamento:", usuario, data, hora, servico);
     inserirRegistroTabelaAgendamento(usuario, data, hora, servico);
 }
 
@@ -168,19 +167,25 @@ async function procuraAgendamento(AGENDAMENTOCPF) {
         driver: sqlite3.Database,
     });
 
-    console.log("Buscando agendamento para:", AGENDAMENTOCPF);
-
     const busca = `SELECT * FROM AGENDAMENTO WHERE AGENDAMENTOCPF = ? AND ((AGENDAMENTODATA > DATE('now') ) OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA >= TIME('now')))`;
     const retornoBusca = await db.all(busca, [AGENDAMENTOCPF]);
 
-    console.log("Retorno da busca: ", retornoBusca);
-
     if(retornoBusca && retornoBusca.length > 0) {
         const agendamentosEncontrados = retornoBusca.map(item => {
-            return {nome: item.AGENDAMENTOCPF, 
+            return {id: item.AGENDAMENTOID,
+                nome: item.AGENDAMENTOCPF, 
                 data: item.AGENDAMENTODATA,
                 hora: item.AGENDAMENTOHORA, 
                 servico: item.AGENDAMENTOSERVICO};
+        });
+        agendamentosEncontrados.sort(function(a,b) {
+            if (a.data === b.data) {
+                agendamentosEncontrados.sort(function(a,b) {
+                    return a.hora.localeCompare(b.hora);
+                });
+            } else {
+                return a.data.localeCompare(b.data);
+            }
         });
         return agendamentosEncontrados;
     } else {
@@ -190,7 +195,6 @@ async function procuraAgendamento(AGENDAMENTOCPF) {
 
 ipcMain.handle('existeAgendamento', async (event, AGENDAMENTOCPF) => {
     const resultado =  await procuraAgendamento(AGENDAMENTOCPF);
-    console.log("Resultado da busca no banco:", resultado);
     return resultado;
 });
 

@@ -57,7 +57,7 @@
 /* ---- Página Próximos Agendamentos ---- */
 .listagem__agendamentos {
     margin: 1% 5%;
-    max-width: 80%;
+    max-width: 60%;
 }
 
 .list-group{
