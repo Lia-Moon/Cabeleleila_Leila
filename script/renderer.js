@@ -5,8 +5,8 @@ $(function() {
     $("#usuario__incorreto").hide();
     $('.acesso').on("submit", async function(event) {
         event.preventDefault();
-
         const CPFUsuario = $('#acesso__login--CPF').val(); 
+        
         const senhaUsuario = $('#acesso__login--Senha').val(); 
 
         try {
@@ -15,6 +15,7 @@ $(function() {
             if(usuarioEncontrado) {
                 console.log(`Usuário ${CPFUsuario} e/ou senha encontrado`);
                 $("#usuario__incorreto").hide();
+                sessionStorage.setItem('usuarioLogado', CPFUsuario);
                 window.location.href = 'agendar.html'; 
             } else {
                 console.log(`Usuário ${CPFUsuario} e/ou senha não encontrado`);
@@ -25,7 +26,7 @@ $(function() {
         }
     });
 
-    // Trocar de Página
+    // -------------- Trocar de Página
     $("#paginaAgendar").on("click", function(){
         window.location.href = 'agendar.html'; 
     });
@@ -38,35 +39,28 @@ $(function() {
         window.location.href = 'historico.html'; 
     });
 
-    // ------- Página Agendar
+    // -------------- Página Agendar
     $(".opcoes__servicos--corte__feminino").hide();
     $(".opcoes__servicos--corte__masculino").hide();
     $(".opcoes__servicos--tintura").hide();
-    $(".horario__incorreto").hide();
-
+    $(".pendente__data--corte__feminino").hide();
+    $(".pendente__data--corte__masculino").hide();
+    $(".pendente__data--tintura").hide();
+    $(".agendamento__sucesso").hide();
+    
     $.datepicker.setDefaults($.datepicker.regional['pt-BR']);
 
     $('.custom-control-input').on("change", function(){
         let id = this.id;
         let classeAlterada = `.opcoes__servicos--${id}`;
+        let esconderMensagem = `.pendente__data--${id}`;
 
         if($(this).is(':checked')) {            
             $(classeAlterada).show();
         } else {
             $(classeAlterada).hide();
-        }
-    });
-
-    $('.escolha__horario').on("change", function(){
-        let horario = this.value;
-        let horarioMinino = '08:00';
-        let horarioMaximo = '18:00';
-
-        if(horario < horarioMinino || horario >= horarioMaximo) {
-            $(".horario__incorreto").show();
-            this.value = "";
-        } else {
-            $(".horario__incorreto").hide();
+            $(esconderMensagem).hide(); 
+            $(".agendamento__sucesso").hide();        
         }
     });
 
@@ -76,12 +70,72 @@ $(function() {
         changeMonth: true,  
         changeYear: false,    
         minDate: 0,   // não permite selecionar datas passadas      
-        maxDate: "+5M +10D",
+        maxDate: "+6M",
         beforeShowDay: function (date) {
             var day = date.getDay();
             return [day !== 0 && day !== 1]; // 0 = domingo, 1 = segunda
         }
     });
 
+    $('.agendar').on("click", async function(event) {
+        event.preventDefault();
+        const usuarioLogado = sessionStorage.getItem('usuarioLogado');
 
+        const selecionadoFeminino = $("#corte__feminino").is(':checked');
+        const selecionadoMasculino = $("#corte__masculino").is(':checked');
+        const selecionadoTintura = $("#tintura").is(':checked');
+
+        let validacao = true;
+
+        const verificarData = (selecionado, datepicker, mensagem) => {
+            if(selecionado) {
+                if($(datepicker).val() == ""){
+                    $(mensagem).show();
+                    validacao = false;
+                } else {
+                    $(mensagem).hide();
+                }
+            }
+        };
+
+        verificarData(selecionadoFeminino, "#datepickerfeminino", ".pendente__data--corte__feminino");
+        verificarData(selecionadoMasculino, "#datepickermasculino", ".pendente__data--corte__masculino");
+        verificarData(selecionadoTintura, "#datepickertintura", ".pendente__data--tintura");   
+        
+        if (!validacao) {
+            console.log("Datas não preenchidas");
+            return;
+        }        
+
+        if (selecionadoFeminino && validacao) {
+            const dataCorteFeminino = $('#datepickerfeminino').val(); 
+            const horaCorteFeminino = $('#horario__feminino').val(); 
+
+            await window.electronAPI.inserirAgendamento(usuarioLogado, dataCorteFeminino, horaCorteFeminino, 'CORTEFEM'); // Corte Feminino
+            console.log("Dados do corte feminino enviados!");
+            $(".agendamento__sucesso").show();
+        }
+
+        if (selecionadoMasculino && validacao) {
+            const dataCorteMasculino = $('#datepickermasculino').val(); 
+            const horaCorteMasculino = $('#horario__masculino').val(); 
+            await window.electronAPI.inserirAgendamento(usuarioLogado, dataCorteMasculino, horaCorteMasculino, 'CORTEMASC'); // Corte Masculino
+            console.log("Dados do corte masculino enviados!");
+            
+            $(".agendamento__sucesso").show();
+        }
+
+        if (selecionadoTintura && validacao) {
+            const dataCorteTintura = $('#datepickertintura').val(); 
+            const horaCorteTintura = $('#horario__tintura').val(); 
+
+            await window.electronAPI.inserirAgendamento(usuarioLogado, dataCorteTintura, horaCorteTintura, 'TINTURA'); // Tintura
+            console.log("Dados da tintura enviados!");
+            $(".agendamento__sucesso").show();
+        }
+
+        $('.opcoes__servicos input').each(function(){
+            $(this).val('');
+        });
+    });
 });

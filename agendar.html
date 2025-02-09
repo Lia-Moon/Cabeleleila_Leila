@@ -41,22 +41,58 @@
         <div class="opcoes__servicos--corte__feminino">
             <p>Escolha um horário para o Corte Feminino</p>
             <input type="text" id="datepickerfeminino" class="datepicker">
-            <input type="time" class="escolha__horario" id="horariofeminino" name="horario" min="08:00" max="18:00">
-        </div>
+            <select id="horario__feminino" name="horario">
+                <option value="08:00">08:00</option>
+                <option value="09:00">09:00</option>
+                <option value="10:00">10:00</option>
+                <option value="11:00">11:00</option>
+                <option value="12:00">12:00</option>
+                <option value="13:00">13:00</option>
+                <option value="14:00">14:00</option>
+                <option value="15:00">15:00</option>
+                <option value="16:00">16:00</option>
+                <option value="17:00">17:00</option>                
+            </select>
+            </div>
         <div class="opcoes__servicos--corte__masculino">
             <p>Escolha um horário para o Corte Masculino</p>
             <input type="text" id="datepickermasculino" class="datepicker">
-            <input type="time" class="escolha__horario" id="horariomasculino" name="horario" min="09:00" max="18:00">
-            
+            <select id="horario__masculino" name="horario">
+                <option value="08:00">08:00</option>
+                <option value="09:00">09:00</option>
+                <option value="10:00">10:00</option>
+                <option value="11:00">11:00</option>
+                <option value="12:00">12:00</option>
+                <option value="13:00">13:00</option>
+                <option value="14:00">14:00</option>
+                <option value="15:00">15:00</option>
+                <option value="16:00">16:00</option>
+                <option value="17:00">17:00</option>                
+            </select>
         </div>
         <div class="opcoes__servicos--tintura">
             <p>Escolha um horário para a Tintura</p>
             <input type="text" id="datepickertintura" class="datepicker">
-            <input type="time" class="escolha__horario" id="horariotintura" name="horario" min="09:00" max="18:00">
+            <select id="horario__tintura" name="horario">
+                <option value="08:00">08:00</option>
+                <option value="09:00">09:00</option>
+                <option value="10:00">10:00</option>
+                <option value="11:00">11:00</option>
+                <option value="12:00">12:00</option>
+                <option value="13:00">13:00</option>
+                <option value="14:00">14:00</option>
+                <option value="15:00">15:00</option>
+                <option value="16:00">16:00</option>
+                <option value="17:00">17:00</option>                
+            </select>
         </div>
-        <small class="horario__incorreto">Por favor selecione um horário dentro do período das 08h às 18h.</small>
-        <br>
-        <button type="button" class="btn btn-outline-dark">Agendar</button>
+        <div class="mensagens__pendente">
+            <small class="pendente__data--corte__feminino">Inclua a data desejada para o corte feminino.<br></small>     
+            <small class="pendente__data--corte__masculino">Inclua a data desejada para o corte masculino.<br></small>   
+            <small class="pendente__data--tintura">Inclua a data desejada para a tintura.<br></small>   
+        </div>            
+        <small class="agendamento__sucesso">Agendamento registrado com sucesso.<br></small>   
+        <button class="agendar" type="button" id="opcoes__servicos--botao--agendar" class="btn btn-outline-dark">Agendar</button>
     </div>
     
 </body>

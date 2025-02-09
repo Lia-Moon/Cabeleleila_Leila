@@ -30,8 +30,12 @@
     padding-top: 15px;
 }
 
-.horario__incorreto {
+.horario__incorreto, .mensagens__pendente {
     color: red;
+}
+
+.agendamento__sucesso {
+    color: green;
 }
 
 .ui-datepicker {

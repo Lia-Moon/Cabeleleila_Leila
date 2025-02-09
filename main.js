@@ -30,6 +30,8 @@ app.whenReady().then(() => {
     });
 });
 
+// -------------- Tabela Usuário
+
 async function criarTabelaUsuarios() {
     const db = await open({
         filename: 'banco/banco.db',
@@ -79,6 +81,66 @@ criarTabelaUsuarios();
 // inserirRegistroTabelaUsuarios('LEILA', '9827504594', '15270659948', 'SENHA112233');
 // inserirRegistroTabelaUsuarios('AGUSTA', '65993168625', '71690665645', 'BOLINHO');
 // inserirRegistroTabelaUsuarios('EMILY', '51983540418', '32459125526', '112233');
+
+// -------------- Tabela Agendamentos
+
+async function criarTabelaAgendamento() {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    // await db.run('DROP TABLE IF EXISTS AGENDAMENTO'); // Deleta a tabela de Agendamento
+
+    db.run(`CREATE TABLE IF NOT EXISTS AGENDAMENTO (
+        AGENDAMENTOID INTEGER NOT NULL PRIMARY KEY, 
+        AGENDAMENTONOME VARCHAR(15) NOT NULL, 
+        AGENDAMENTODATA DATE NOT NULL,
+        AGENDAMENTOHORA TIME NOT NULL,
+        AGENDAMENTOSERVICO VARCHAR(10) NOT NULL
+    )`);  
+}
+
+async function inserirRegistroTabelaAgendamento(AGENDAMENTONOME, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO) {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+    
+    await db.run('INSERT INTO AGENDAMENTO (AGENDAMENTONOME, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO) VALUES (?,?,?,?)', [
+        AGENDAMENTONOME,
+        AGENDAMENTODATA,
+        AGENDAMENTOHORA,
+        AGENDAMENTOSERVICO,
+    ]);
+    console.log(`Registro com NOME ${AGENDAMENTONOME} DATA ${AGENDAMENTODATA} HORA ${AGENDAMENTOHORA} SERVICO ${AGENDAMENTOSERVICO} inserido com sucesso.`);
+}
+
+async function deletarRegistroTabelaAgendamento(AGENDAMENTOID) {
+    const db = await open({
+      filename: 'banco/banco.db',
+      driver: sqlite3.Database,
+    });
+    await db.run('DELETE FROM AGENDAMENTO WHERE ID = ?', [AGENDAMENTOID]);
+    console.log(`Registro com ID ${AGENDAMENTOID} deletado com sucesso.`);
+}
+
+criarTabelaAgendamento();
+
+async function inserirAgendamento(nome, date, hora, servico) {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    inserirRegistroTabelaAgendamento(nome, date, hora, servico);
+}
+
+ipcMain.handle('inserirAgendamento', async (event, nome, data, hora, servico) => {
+    return await inserirAgendamento(nome, data, hora, servico);
+});
+
+// -------------- Pesquisar Usuário
 
 async function verificarUsuario(USUARIOCPF, USUARIOSENHA) {
     const db = await open({
