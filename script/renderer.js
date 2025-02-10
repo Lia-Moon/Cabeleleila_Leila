@@ -68,6 +68,9 @@ $(function() {
         $(".pendente__data--corte__feminino").hide();
         $(".pendente__data--corte__masculino").hide();
         $(".pendente__data--tintura").hide();
+        $(".pendente__horario--corte__feminino").hide();
+        $(".pendente__horario--corte__masculino").hide();
+        $(".pendente__horario--tintura").hide();
         $(".agendamento__sucesso").hide();
         
         $(async function() {
@@ -214,7 +217,7 @@ $(function() {
 
             const verificarData = (selecionado, datepicker, mensagem) => {
                 if(selecionado) {
-                    if($(datepicker).val() == ""){
+                    if($(datepicker).val().trim() === ""){
                         $(mensagem).show();
                         return false;
                     } else {
@@ -227,7 +230,7 @@ $(function() {
 
             const verificarHora = (selecionado, horario, mensagem) => {
                 if(selecionado) {
-                    if($(horario).val() == ""){
+                    if($(horario).val().trim() === ""){
                         $(mensagem).show();
                         return false;
                     } else {
@@ -242,9 +245,9 @@ $(function() {
             let validacaoDataMasculino = verificarData(selecionadoMasculino, "#datepickermasculino", ".pendente__data--corte__masculino");
             let validacaoDataTintura = verificarData(selecionadoTintura, "#datepickertintura", ".pendente__data--tintura");   
 
-            let validacaoHorarioFeminino = verificarHora(selecionadoFeminino, "#horario__feminino", ".pendente__data--corte__feminino");
-            let validacaoHorarioMasculino = verificarHora(selecionadoMasculino, "#horario__masculino", ".pendente__data--corte__masculino");
-            let validacaoHorarioTintura = verificarHora(selecionadoTintura, "#horario__tintura", ".pendente__data--tintura");   
+            let validacaoHorarioFeminino = verificarHora(selecionadoFeminino, "#horario__feminino", ".pendente__horario--corte__feminino");
+            let validacaoHorarioMasculino = verificarHora(selecionadoMasculino, "#horario__masculino", ".pendente__horario--corte__masculino");
+            let validacaoHorarioTintura = verificarHora(selecionadoTintura, "#horario__tintura", ".pendente__horario--tintura");   
             
             if((selecionadoFeminino && !validacaoDataFeminino) ||
                 (selecionadoMasculino && !validacaoDataMasculino) ||
@@ -345,18 +348,48 @@ $(function() {
                     $(this).find(".informacao__adicional").toggle();
                 });
 
+                // Cancelar agendamento                
                 $(document).on("click", "[id^='botao__cancelar__agendamento']", async function(botaoClicado) { //pega todos os ids
                     botaoClicado.stopPropagation(); 
 
                     let idAgendamento = $(this).data("id");
 
-                    var excluirAgendamento = await window.electronAPI.excluirIdAgendamento(idAgendamento);
+                    let hoje = new Date(); // data atual
+                    let hojeMaisDoisDias = new Date(hoje);
+                    hojeMaisDoisDias.setDate(hoje.getDate() + 2); // somar 2 dias
 
-                    if(!excluirAgendamento) {
-                        console.log(`Registro ${idAgendamento} excluído com sucesso`);
-                        window.location.reload();
-                    } else {
-                        console.log(`Registro ${idAgendamento} não excluído`)
+                    const agendamentoSelecionado = possuiAgendamento.find(item => item.id === idAgendamento);
+
+                    if(agendamentoSelecionado) {
+                        let dataAgendamentoSelecionado = new Date(agendamentoSelecionado.data);
+
+                        if(dataAgendamentoSelecionado >= hoje && dataAgendamentoSelecionado <= hojeMaisDoisDias){
+                            console.log(`Agendamento  ${idAgendamento} com menos de dois dias`, agendamentoSelecionado);
+                            var criarBotao = $("#mostrar__mensagens");
+                            var conteudoHtml = '';
+                            conteudoHtml += `
+                                                <div class="p-3 mb-2 bg-secondary text-white rounded">
+                                                    <p class="mb-1"><strong>Atenção!</strong><br>
+                                                                    Esse agendamento ocorrerá em até dois dias.<br>
+                                                                    Entre em contato através do número <strong>(09) 827504594</strong> para realizar o cancelamento.</p>
+                                                </div>
+                                            `;                            
+                            criarBotao.html(conteudoHtml);
+                            return;
+                        } 
+                    }
+                    
+                    try {
+                        var excluirAgendamento = await window.electronAPI.excluirIdAgendamento(idAgendamento);
+                        if(excluirAgendamento) {
+                            console.log(`Registro ${idAgendamento} excluído com sucesso`);
+                            window.location.reload();
+                            return;      
+                        } else {
+                            console.log(`Registro ${idAgendamento} não excluído`)
+                        }
+                    } catch (error) {
+                        console.error("Erro ao tentar excluir o agendamento", error);
                     }
                 });
             } else {

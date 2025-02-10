@@ -124,8 +124,14 @@ async function deletarRegistroTabelaAgendamento(AGENDAMENTOID) {
       filename: 'banco/banco.db',
       driver: sqlite3.Database,
     });
-    await db.run('DELETE FROM AGENDAMENTO WHERE AGENDAMENTOID = ?', [AGENDAMENTOID]);
-    console.log(`Registro com ID ${AGENDAMENTOID} deletado com sucesso.`);
+    const deletado = await db.run('DELETE FROM AGENDAMENTO WHERE AGENDAMENTOID = ?', [AGENDAMENTOID]);
+
+    if(deletado.changes > 0) {
+        console.log(`Registro com ID ${AGENDAMENTOID} deletado com sucesso.`);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 criarTabelaAgendamento();
