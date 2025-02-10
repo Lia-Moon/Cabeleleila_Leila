@@ -116,12 +116,15 @@ async function inserirRegistroTabelaAgendamento(AGENDAMENTOCPF, AGENDAMENTODATA,
     console.log(`Registro com CPF ${AGENDAMENTOCPF} DATA ${AGENDAMENTODATA} HORA ${AGENDAMENTOHORA} SERVICO ${AGENDAMENTOSERVICO} inserido com sucesso.`);
 }
 
+
+
+// Excluir agendamento
 async function deletarRegistroTabelaAgendamento(AGENDAMENTOID) {
     const db = await open({
       filename: 'banco/banco.db',
       driver: sqlite3.Database,
     });
-    await db.run('DELETE FROM AGENDAMENTO WHERE ID = ?', [AGENDAMENTOID]);
+    await db.run('DELETE FROM AGENDAMENTO WHERE AGENDAMENTOID = ?', [AGENDAMENTOID]);
     console.log(`Registro com ID ${AGENDAMENTOID} deletado com sucesso.`);
 }
 
@@ -159,7 +162,7 @@ ipcMain.handle('buscarUsuario', async (event, USUARIOCPF, USUARIOSENHA) => {
     return await verificarUsuario(USUARIOCPF, USUARIOSENHA);
 });
 
-// -------------- Verifica se existe agendamento
+// -------------- Verifica se existe agendamento novo com CPF
 
 async function procuraAgendamento(AGENDAMENTOCPF) {
     const db = await open({
@@ -198,3 +201,88 @@ ipcMain.handle('existeAgendamento', async (event, AGENDAMENTOCPF) => {
     return resultado;
 });
 
+// -------------- Verifica se existe agendamento novo sem considerar CPF
+
+async function procuraQlqAgendamento() {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    const busca = `SELECT * FROM AGENDAMENTO WHERE ((AGENDAMENTODATA > DATE('now') ) OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA >= TIME('now')))`;
+    const retornoBusca = await db.all(busca);
+
+    if(retornoBusca && retornoBusca.length > 0) {
+        const agendamentosEncontrados = retornoBusca.map(item => {
+            return {id: item.AGENDAMENTOID,
+                nome: item.AGENDAMENTOCPF, 
+                data: item.AGENDAMENTODATA,
+                hora: item.AGENDAMENTOHORA, 
+                servico: item.AGENDAMENTOSERVICO};
+        });
+        agendamentosEncontrados.sort(function(a,b) {
+            if (a.data === b.data) {
+                agendamentosEncontrados.sort(function(a,b) {
+                    return a.hora.localeCompare(b.hora);
+                });
+            } else {
+                return a.data.localeCompare(b.data);
+            }
+        });
+        return agendamentosEncontrados;
+    } else {
+        return null;
+    }
+}
+
+ipcMain.handle('procuraQlqAgendamento', async (event) => {
+    const resultado = await procuraQlqAgendamento();
+    return resultado;
+});
+
+// -------------- Exclusão de Agendamento
+
+ipcMain.handle('excluirIdAgendamento', async (event, AGENDAMENTOID) => {
+    const resultado = await deletarRegistroTabelaAgendamento(AGENDAMENTOID);
+    return resultado;
+});
+
+
+// -------------- Verifica se existe agendamento ANTIGO com CPF
+
+async function procuraAgendamentoAntigo(AGENDAMENTOCPF) {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    const busca = `SELECT * FROM AGENDAMENTO WHERE AGENDAMENTOCPF = ? AND ((AGENDAMENTODATA < DATE('now') ) OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA < TIME('now')))`;
+    const retornoBusca = await db.all(busca, [AGENDAMENTOCPF]);
+
+    if(retornoBusca && retornoBusca.length > 0) {
+        const agendamentosEncontrados = retornoBusca.map(item => {
+            return {id: item.AGENDAMENTOID,
+                nome: item.AGENDAMENTOCPF, 
+                data: item.AGENDAMENTODATA,
+                hora: item.AGENDAMENTOHORA, 
+                servico: item.AGENDAMENTOSERVICO};
+        });
+        agendamentosEncontrados.sort(function(a,b) {
+            if (a.data === b.data) {
+                agendamentosEncontrados.sort(function(a,b) {
+                    return b.hora.localeCompare(a.hora);
+                });
+            } else {
+                return b.data.localeCompare(a.data);
+            }
+        });
+        return agendamentosEncontrados;
+    } else {
+        return null;
+    }
+}
+
+ipcMain.handle('existeAgendamentoAntigo', async (event, AGENDAMENTOCPF) => {
+    const resultado =  await procuraAgendamentoAntigo(AGENDAMENTOCPF);
+    return resultado;
+});

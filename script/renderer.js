@@ -1,7 +1,25 @@
+function formataStringAnoMesDia(data) {
+    var dia  = data.split("/")[0];
+    var mes  = data.split("/")[1];
+    var ano  = data.split("/")[2];
+    const dataFormatada = ano + '-' + ("0"+mes).slice(-2) + '-' + ("0"+dia).slice(-2);            
+    return dataFormatada;
+}
+
+function formataStringDiaMesAno(data) {
+    var ano  = data.split("-")[0];
+    var mes  = data.split("-")[1];
+    var dia  = data.split("-")[2];
+    const dataFormatada = ("0"+dia).slice(-2) + '/' + ("0"+mes).slice(-2) + '/' + ano;          
+    return dataFormatada;
+}
+
+
 $(function() {
     console.log('Renderer carregado. window.electronAPI:', window.electronAPI);
     console.log('jQuery carregado:', typeof $ !== 'undefined');
     console.log("jQuery versão:", $.fn.jquery);
+
 
     if(window.location.pathname.endsWith("index.html")){
         $("#usuario__incorreto").hide();
@@ -68,18 +86,79 @@ $(function() {
             }
         });
 
-        $('.datepicker').datepicker({
-            showAnim: 'fadeIn',  
-            firstDay: 0,       
-            changeMonth: true,  
-            changeYear: false,    
-            minDate: 0,   // não permite selecionar datas passadas      
-            maxDate: "+6M",
-            beforeShowDay: function (date) {
-                var day = date.getDay();
-                return [day !== 0 && day !== 1]; // 0 = domingo, 1 = segunda
+        // Verificar quais horas/datas estão disponíveis
+        const atualizarDatasDisponiveis = async () => {
+            const usuarioLogado = sessionStorage.getItem('usuarioLogado');
+
+            if(!usuarioLogado){
+                console.log("Sem usuário logado");
+                return;
             }
-        });
+            var procuraQlqAgendamento = await window.electronAPI.procuraQlqAgendamento();
+            // console.log("Qualquer agendamento encontrado:", procuraQlqAgendamento);
+
+            if(!procuraQlqAgendamento) {
+                procuraQlqAgendamento = [];
+                console.log("Sem agendamento encontrado");
+            }
+
+            const datasSemHorariosDisponiveis = [];
+            const datasOcupadas = procuraQlqAgendamento.map(item => (item.data));
+            
+            const horariosPossiveis = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+
+            datasOcupadas.forEach(data => {
+                const horariosOcupados = procuraQlqAgendamento.filter(item => item.data === data)
+                                                                    .map(item => item.hora);
+                // console.log(`Data: ${data}, Horários ocupados:`, horariosOcupados);                                                    
+                if (horariosOcupados.length === horariosPossiveis.length) {
+                    datasSemHorariosDisponiveis.push((data));
+                }
+            });
+            
+            $('.datepicker').datepicker({
+                showAnim: 'fadeIn',  
+                firstDay: 0,       
+                changeMonth: true,  
+                changeYear: false,    
+                minDate: 0,   // não permite selecionar datas passadas      
+                maxDate: "+6M",
+                beforeShowDay: function (date) {
+                    var day = date.getDay();
+                    const dataFormatada = $.datepicker.formatDate('yy-mm-dd', date);
+                    return [day !== 0 && day !== 1 && !datasSemHorariosDisponiveis.includes(dataFormatada), ""]; // 0 = domingo, 1 = segunda
+                }
+            });
+        }
+
+        atualizarDatasDisponiveis();
+
+        $('#datepickerfeminino, #datepickermasculino, #datepickertintura').on('change', async function() {
+            $(".agendamento__sucesso").hide();  
+            const dataEscolhida = $(this).val();
+            const usuarioLogado = sessionStorage.getItem('usuarioLogado');
+            if(!usuarioLogado){
+                console.log("Sem usuário logado");
+                return;
+            }
+
+            var procuraQlqAgendamento = await window.electronAPI.procuraQlqAgendamento();
+            // console.log("Qualquer agendamento (horários) encontrado:", procuraQlqAgendamento);
+
+            const dataEscolhidaFormatada = formataStringAnoMesDia(dataEscolhida);
+            const horariosOcupados = procuraQlqAgendamento.filter(item => item.data === dataEscolhidaFormatada).map(item => item.hora);
+
+            const horariosPossiveis = ["", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+
+            const campoIdAlterado = $(this).attr('id').replace('datepicker', 'horario__');
+            $(`#${campoIdAlterado}`).empty();
+
+            horariosPossiveis.forEach(hora => {
+                if (!horariosOcupados.includes(hora)) {
+                    $(`#${campoIdAlterado}`).append(new Option(hora, hora));
+                }
+            });
+        })
 
         $('.agendar').on("click", async function(event) {
             event.preventDefault();
@@ -94,64 +173,83 @@ $(function() {
             const selecionadoMasculino = $("#corte__masculino").is(':checked');
             const selecionadoTintura = $("#tintura").is(':checked');
 
-            let validacao = true;
+            if(!selecionadoFeminino && !selecionadoMasculino && !selecionadoTintura) {
+                console.log("Nenhum serviço foi selecionado");
+                return;
+            };
 
             const verificarData = (selecionado, datepicker, mensagem) => {
                 if(selecionado) {
                     if($(datepicker).val() == ""){
                         $(mensagem).show();
-                        validacao = false;
+                        return false;
                     } else {
                         $(mensagem).hide();
+                        return true;
                     }
                 }
+                return true;
             };
 
-            verificarData(selecionadoFeminino, "#datepickerfeminino", ".pendente__data--corte__feminino");
-            verificarData(selecionadoMasculino, "#datepickermasculino", ".pendente__data--corte__masculino");
-            verificarData(selecionadoTintura, "#datepickertintura", ".pendente__data--tintura");   
-            
-            if (!validacao) {
-                console.log("Datas não preenchidas");
-                return;
-            }        
+            const verificarHora = (selecionado, horario, mensagem) => {
+                if(selecionado) {
+                    if($(horario).val() == ""){
+                        $(mensagem).show();
+                        return false;
+                    } else {
+                        $(mensagem).hide();
+                        return true;
+                    }
+                }
+                return true;
+            };
 
-            function formataStringData(data) {
-                var dia  = data.split("/")[0];
-                var mes  = data.split("/")[1];
-                var ano  = data.split("/")[2];
-                const dataFormatada = ano + '-' + ("0"+mes).slice(-2) + '-' + ("0"+dia).slice(-2);
-                console.log("Data formatada:", dataFormatada);                  
-                return dataFormatada;
+            let validacaoDataFeminino = verificarData(selecionadoFeminino, "#datepickerfeminino", ".pendente__data--corte__feminino");
+            let validacaoDataMasculino = verificarData(selecionadoMasculino, "#datepickermasculino", ".pendente__data--corte__masculino");
+            let validacaoDataTintura = verificarData(selecionadoTintura, "#datepickertintura", ".pendente__data--tintura");   
+
+            let validacaoHorarioFeminino = verificarHora(selecionadoFeminino, "#horario__feminino", ".pendente__data--corte__feminino");
+            let validacaoHorarioMasculino = verificarHora(selecionadoMasculino, "#horario__masculino", ".pendente__data--corte__masculino");
+            let validacaoHorarioTintura = verificarHora(selecionadoTintura, "#horario__tintura", ".pendente__data--tintura");   
+            
+            if((selecionadoFeminino && !validacaoDataFeminino) ||
+                (selecionadoMasculino && !validacaoDataMasculino) ||
+                (selecionadoTintura && !validacaoDataTintura)) {
+                    // console.log("Algumas Datas não preenchidas", validacaoDataFeminino, validacaoDataMasculino, validacaoDataTintura);
+                    return;
             }
 
-            if (selecionadoFeminino && validacao) {
+            if((selecionadoFeminino && !validacaoHorarioFeminino) ||
+                (selecionadoMasculino && !validacaoHorarioMasculino) ||
+                (selecionadoTintura && !validacaoHorarioTintura)) {
+                    // console.log("Alguns Horários não preenchidas", validacaoDataFeminino, validacaoDataMasculino, validacaoDataTintura);
+                    return;
+            }    
+            
+            if (selecionadoFeminino && validacaoDataFeminino && validacaoHorarioFeminino) {
                 const dataCorteFeminino = $('#datepickerfeminino').val(); 
                 const horaCorteFeminino = $('#horario__feminino').val(); 
                 
-                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringData(dataCorteFeminino), horaCorteFeminino, 'Corte Feminino'); // Corte Feminino
+                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringAnoMesDia(dataCorteFeminino), horaCorteFeminino, 'Corte Feminino');
                 console.log("Dados do corte feminino enviados!");
-                $(".agendamento__sucesso").show();
             }
 
-            if (selecionadoMasculino && validacao) {
+            if (selecionadoMasculino && validacaoDataMasculino && validacaoHorarioMasculino) {
                 const dataCorteMasculino = $('#datepickermasculino').val(); 
                 const horaCorteMasculino = $('#horario__masculino').val(); 
-                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringData(dataCorteMasculino), horaCorteMasculino, 'Corte Feminino'); // Corte Masculino
+                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringAnoMesDia(dataCorteMasculino), horaCorteMasculino, 'Corte Masculino');
                 console.log("Dados do corte masculino enviados!");
-                
-                $(".agendamento__sucesso").show();
             }
 
-            if (selecionadoTintura && validacao) {
+            if (selecionadoTintura && validacaoDataTintura && validacaoHorarioTintura) {
                 const dataCorteTintura = $('#datepickertintura').val(); 
                 const horaCorteTintura = $('#horario__tintura').val(); 
 
-                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringData(dataCorteTintura), horaCorteTintura, 'Tintura'); // Tintura
+                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringAnoMesDia(dataCorteTintura), horaCorteTintura, 'Tintura');
                 console.log("Dados da tintura enviados!");
-                $(".agendamento__sucesso").show();
             }
 
+            $(".agendamento__sucesso").show();
             $('.opcoes__servicos input').each(function(){
                 $(this).val('');
             });
@@ -184,47 +282,110 @@ $(function() {
             var criarBotao = $("#listagem__agendamentos");
             var conteudoHtml = '';
 
-            function formataStringData(data) {
-                var ano  = data.split("-")[0];
-                var mes  = data.split("-")[1];
-                var dia  = data.split("-")[2];
-                const dataFormatada = ("0"+dia).slice(-2) + '/' + ("0"+mes).slice(-2) + '/' + ano;          
-                return dataFormatada;
-            }
-
             if(possuiAgendamento && possuiAgendamento.length > 0) {
                 $(".listagem__agendamentos--existe").show();
                 possuiAgendamento.forEach(function(item){
-                    conteudoHtml += `<button type="button" class="list-group-item list-group-item-action" id="idServico${item.id}">${item.servico} 
-                                    <br>Dia: ${formataStringData(item.data)} às ${item.hora}</button>`
-                });
-                criarBotao.html(conteudoHtml);    
-
-                possuiAgendamento.forEach(function(item){
-                    $(`#idServico${item.id}`).on("click", function(){
-                        conteudoContato = `
-                                        <div>
-                                            <p id="idServico${item.id}">${item.servico}
-                                            <br>Dia: ${formataStringData(item.data)} às ${item.hora}</p>
+                    conteudoHtml += `
+                                    <div class="list-group-item botao__servico" id="idServico${item.id}">
+                                        <div class="servico__informacoes">
+                                            ${item.servico}<br>Dia: ${formataStringDiaMesAno(item.data)} às ${item.hora}
+                                        </div>
+                                        <div class="informacao__adicional">
                                             <p class="mb-1">Compareça 15 minutos antes do horário marcado.</p>
                                             <small>Local: Avenida das Flores, nº 156.<br></small>
                                             <small>Telefone: (09) 827504594<br><br></small>                                        
-                                            <button type="button" class="btn btn-secondary btn-sm">Editar agendamento</button>
-                                            <button type="button" class="btn btn-secondary btn-sm">Cancelar agendamento</button>
+                                            <button type="button" id="botao__editar__agendamento${item.id}" class="btn btn-secondary btn-sm" data-id=${item.id}>Editar agendamento</button>
+                                            <button type="button" id="botao__cancelar__agendamento${item.id}" class="btn btn-secondary btn-sm" data-id=${item.id}>Cancelar agendamento</button>
                                         </div>
-                                        `
-                        $(`#idServico${item.id}`).html(conteudoContato);                                      
-                    });
-                    
+                                    </div>
+                                    `;
+                });
+                criarBotao.html(conteudoHtml);    
+
+                $("#listagem__agendamentos").on("click", ".botao__servico", function(botaoClicado){
+                    if($(botaoClicado.target).is("button")) {
+                        return;
+                    }
+                    $(this).find(".informacao__adicional").toggle();
+                });
+
+                $(document).on("click", "[id^='botao__cancelar__agendamento']", async function(botaoClicado) { //pega todos os ids
+                    botaoClicado.stopPropagation(); 
+
+                    let idAgendamento = $(this).data("id");
+
+                    var excluirAgendamento = await window.electronAPI.excluirIdAgendamento(idAgendamento);
+
+                    if(!excluirAgendamento) {
+                        console.log(`Registro ${idAgendamento} excluído com sucesso`);
+                        window.location.reload();
+                    } else {
+                        console.log(`Registro ${idAgendamento} não excluído`)
+                    }
                 });
             } else {
                 $(".listagem__agendamentos--nao--existe").show();
                 console.log("Não existe agendamento");
+            }                     
+        });
+    };
+
+    // -------------- Página Histórico
+    if(window.location.pathname.endsWith("historico.html")){
+        $(".listagem__agendamentos--existe").hide();
+        $(".listagem__agendamentos--nao--existe").hide();
+
+        $(async function() {
+            const usuarioLogado = sessionStorage.getItem('usuarioLogado');
+
+            console.log("Usuário logado:", usuarioLogado);
+
+            if(!usuarioLogado){
+                console.log("Sem usuário logado");
+                return;
             }
 
-            
-            
+            var possuiAgendamentoAntigo = await window.electronAPI.existeAgendamentoAntigo(usuarioLogado);
 
+            if(possuiAgendamentoAntigo) {
+                console.log("Retorno dos agendamentos encontrados:", possuiAgendamentoAntigo);
+            } else {
+                console.log("Sem valores encontrados:", possuiAgendamentoAntigo);
+            }
+
+            var criarBotao = $("#listagem__agendamentos");
+            var conteudoHtml = '';
+
+            if(possuiAgendamentoAntigo && possuiAgendamentoAntigo.length > 0) {
+                $(".listagem__agendamentos--existe").show();
+                possuiAgendamentoAntigo.forEach(function(item){
+                    conteudoHtml += `
+                                    <div class="list-group-item botao__servico" id="idServico${item.id}">
+                                        <div class="servico__informacoes">
+                                            ${item.servico}<br>Dia: ${formataStringDiaMesAno(item.data)} às ${item.hora}
+                                        </div>
+                                        <div class="informacao__adicional">
+                                            <p class="atendimento__realizado"><br>Atendimento realizado.</p>
+                                            <small>Local: Avenida das Flores, nº 156.<br></small>
+                                            <small>Telefone: (09) 827504594<br></small>                                                                                    
+                                        </div>
+                                    </div>
+                                    `;
+                });
+                criarBotao.html(conteudoHtml);  
+
+                $("#listagem__agendamentos").on("click", ".botao__servico", function(botaoClicado){
+                    if($(botaoClicado.target).is("button")) {
+                        return;
+                    }
+                    $(this).find(".informacao__adicional").toggle();
+                });
+
+            } else {
+                $(".listagem__agendamentos--nao--existe").show();
+                console.log("Não existe agendamento antigo");
+            };
         });
+
     };
 });

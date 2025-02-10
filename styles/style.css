@@ -55,11 +55,23 @@
 }
 
 /* ---- Página Próximos Agendamentos ---- */
-.listagem__agendamentos {
+.listagem__agendamentos__encontrados {
     margin: 1% 5%;
     max-width: 60%;
 }
 
 .list-group{
     margin-top: 3%;
+}
+
+.botao__servico {
+    cursor: pointer;
+}
+
+.informacao__adicional {
+    display: none;
+}
+
+.atendimento__realizado{
+    color: green;
 }
