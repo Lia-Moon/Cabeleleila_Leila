@@ -70,6 +70,40 @@ $(function() {
         $(".pendente__data--tintura").hide();
         $(".agendamento__sucesso").hide();
         
+        $(async function() {
+            const usuarioLogado = sessionStorage.getItem('usuarioLogado');
+
+            if(!usuarioLogado){
+                console.log("Sem usuário logado");
+                return;
+            }
+
+            var possuiAgendamentoMesmaSemana = await window.electronAPI.existeAgendamentoMesmaSemana(usuarioLogado);
+
+            if(possuiAgendamentoMesmaSemana) {
+                console.log("Retorno do 1ª agendamento encontrado dos próximos 7 dias:", possuiAgendamentoMesmaSemana);
+            } else {
+                console.log("Sem valores encontrados:", possuiAgendamentoMesmaSemana);
+            }
+
+            // Se existir agendamento para os próximos 7 dias
+            var criarBotao = $("#listagem__agendamentos__mesma__semana");
+            var conteudoHtml = '';
+
+            possuiAgendamentoMesmaSemana.forEach(function(item){
+                conteudoHtml += `
+                                <div class="agendamento__semana" id="idServico${item.id}">
+                                    <p>Foi encontrado esse seviço nos próximos dias<br>
+                                       Tente agendar o novo na mesma data em um horário próximo!</p>
+                                    <div class="border bg-light agendamento__semana--dados">
+                                        ${item.servico}<br>Dia: ${formataStringDiaMesAno(item.data)} às ${item.hora}
+                                    </div>
+                                </div>
+                                `;
+            });
+            criarBotao.html(conteudoHtml);  
+        });                    
+
         $.datepicker.setDefaults($.datepicker.regional['pt-BR']);
 
         $('.custom-control-input').on("change", function(){
@@ -271,19 +305,21 @@ $(function() {
                 return;
             }
 
-            var possuiAgendamento = await window.electronAPI.existeAgendamento(usuarioLogado);
+            var possuiAgendamento = await window.electronAPI.existeAgendamento(usuarioLogado);            
 
             if(possuiAgendamento) {
-                console.log("Retorno dos agendamentos encontrados:", possuiAgendamento);
+                console.log("Retorno dos agendamentos encontrados:", possuiAgendamento);                
             } else {
                 console.log("Sem valores encontrados:", possuiAgendamento);
-            }
-
-            var criarBotao = $("#listagem__agendamentos");
-            var conteudoHtml = '';
+            }                    
 
             if(possuiAgendamento && possuiAgendamento.length > 0) {
-                $(".listagem__agendamentos--existe").show();
+                $(".listagem__agendamentos--existe").show();                
+
+                // Exibe todos agendamentos encontrados para o usuário
+                var criarBotao = $("#listagem__agendamentos");
+                var conteudoHtml = '';
+
                 possuiAgendamento.forEach(function(item){
                     conteudoHtml += `
                                     <div class="list-group-item botao__servico" id="idServico${item.id}">
@@ -365,7 +401,7 @@ $(function() {
                                             ${item.servico}<br>Dia: ${formataStringDiaMesAno(item.data)} às ${item.hora}
                                         </div>
                                         <div class="informacao__adicional">
-                                            <p class="atendimento__realizado"><br>Atendimento realizado.</p>
+                                            <p class="atendimento__realizado border border-success rounded text-success">Atendimento realizado</p>
                                             <small>Local: Avenida das Flores, nº 156.<br></small>
                                             <small>Telefone: (09) 827504594<br></small>                                                                                    
                                         </div>

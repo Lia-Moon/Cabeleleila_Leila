@@ -151,7 +151,10 @@ async function verificarUsuario(USUARIOCPF, USUARIOSENHA) {
         driver: sqlite3.Database,
     });
 
-    const busca = 'SELECT * FROM USUARIO WHERE USUARIOCPF = ? AND USUARIOSENHA = ? LIMIT 1';
+    const busca = `SELECT * 
+                   FROM USUARIO 
+                   WHERE USUARIOCPF = ? AND USUARIOSENHA = ? 
+                   LIMIT 1`;
     const retornoBusca = await db.get(busca, [USUARIOCPF, USUARIOSENHA]);
 
     return retornoBusca ? true : false;
@@ -170,7 +173,13 @@ async function procuraAgendamento(AGENDAMENTOCPF) {
         driver: sqlite3.Database,
     });
 
-    const busca = `SELECT * FROM AGENDAMENTO WHERE AGENDAMENTOCPF = ? AND ((AGENDAMENTODATA > DATE('now') ) OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA >= TIME('now')))`;
+    const busca = `SELECT * 
+                   FROM AGENDAMENTO 
+                   WHERE AGENDAMENTOCPF = ? 
+                            AND ((AGENDAMENTODATA > DATE('now') ) 
+                                OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA >= TIME('now')))
+                   ORDER BY AGENDAMENTODATA ASC,
+                            AGENDAMENTOHORA ASC`;
     const retornoBusca = await db.all(busca, [AGENDAMENTOCPF]);
 
     if(retornoBusca && retornoBusca.length > 0) {
@@ -180,15 +189,6 @@ async function procuraAgendamento(AGENDAMENTOCPF) {
                 data: item.AGENDAMENTODATA,
                 hora: item.AGENDAMENTOHORA, 
                 servico: item.AGENDAMENTOSERVICO};
-        });
-        agendamentosEncontrados.sort(function(a,b) {
-            if (a.data === b.data) {
-                agendamentosEncontrados.sort(function(a,b) {
-                    return a.hora.localeCompare(b.hora);
-                });
-            } else {
-                return a.data.localeCompare(b.data);
-            }
         });
         return agendamentosEncontrados;
     } else {
@@ -209,7 +209,10 @@ async function procuraQlqAgendamento() {
         driver: sqlite3.Database,
     });
 
-    const busca = `SELECT * FROM AGENDAMENTO WHERE ((AGENDAMENTODATA > DATE('now') ) OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA >= TIME('now')))`;
+    const busca = `SELECT * 
+                   FROM AGENDAMENTO 
+                   WHERE ((AGENDAMENTODATA > DATE('now') ) 
+                           OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA >= TIME('now')))`;
     const retornoBusca = await db.all(busca);
 
     if(retornoBusca && retornoBusca.length > 0) {
@@ -256,7 +259,13 @@ async function procuraAgendamentoAntigo(AGENDAMENTOCPF) {
         driver: sqlite3.Database,
     });
 
-    const busca = `SELECT * FROM AGENDAMENTO WHERE AGENDAMENTOCPF = ? AND ((AGENDAMENTODATA < DATE('now') ) OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA < TIME('now')))`;
+    const busca = `SELECT * 
+                   FROM AGENDAMENTO 
+                   WHERE AGENDAMENTOCPF = ? 
+                            AND ((AGENDAMENTODATA < DATE('now')) 
+                            OR (AGENDAMENTODATA = DATE('now') AND AGENDAMENTOHORA < TIME('now')))
+                   ORDER BY AGENDAMENTODATA DESC,
+                            AGENDAMENTOHORA DESC`;
     const retornoBusca = await db.all(busca, [AGENDAMENTOCPF]);
 
     if(retornoBusca && retornoBusca.length > 0) {
@@ -267,7 +276,7 @@ async function procuraAgendamentoAntigo(AGENDAMENTOCPF) {
                 hora: item.AGENDAMENTOHORA, 
                 servico: item.AGENDAMENTOSERVICO};
         });
-        agendamentosEncontrados.sort(function(a,b) {
+        /* agendamentosEncontrados.sort(function(a,b) {
             if (a.data === b.data) {
                 agendamentosEncontrados.sort(function(a,b) {
                     return b.hora.localeCompare(a.hora);
@@ -275,7 +284,7 @@ async function procuraAgendamentoAntigo(AGENDAMENTOCPF) {
             } else {
                 return b.data.localeCompare(a.data);
             }
-        });
+        }); */
         return agendamentosEncontrados;
     } else {
         return null;
@@ -284,5 +293,40 @@ async function procuraAgendamentoAntigo(AGENDAMENTOCPF) {
 
 ipcMain.handle('existeAgendamentoAntigo', async (event, AGENDAMENTOCPF) => {
     const resultado =  await procuraAgendamentoAntigo(AGENDAMENTOCPF);
+    return resultado;
+});
+
+// -------------- Verifica se existe agendamento para a mesma semana com CPF
+
+async function procuraAgendamentoMesmaSemana(AGENDAMENTOCPF) {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    const busca = `SELECT * 
+                   FROM AGENDAMENTO 
+                   WHERE AGENDAMENTOCPF = ? AND (AGENDAMENTODATA BETWEEN DATE('now') AND DATE('now', '+7 days')) 
+                   ORDER BY AGENDAMENTODATA ASC,
+                             AGENDAMENTOHORA ASC
+                   LIMIT 1`;
+    const retornoBusca = await db.all(busca, [AGENDAMENTOCPF]);
+
+    if(retornoBusca && retornoBusca.length > 0) {
+        const agendamentosEncontrados = retornoBusca.map(item => {
+            return {id: item.AGENDAMENTOID,
+                nome: item.AGENDAMENTOCPF, 
+                data: item.AGENDAMENTODATA,
+                hora: item.AGENDAMENTOHORA, 
+                servico: item.AGENDAMENTOSERVICO};
+        });
+        return agendamentosEncontrados;
+    } else {
+        return null;
+    }
+}
+
+ipcMain.handle('existeAgendamentoMesmaSemana', async (event, AGENDAMENTOCPF) => {
+    const resultado =  await procuraAgendamentoMesmaSemana(AGENDAMENTOCPF);
     return resultado;
 });

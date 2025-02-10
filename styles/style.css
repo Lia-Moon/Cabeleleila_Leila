@@ -22,6 +22,12 @@
     padding: 1% 5%;
 }
 
+.agendamento__semana--dados {
+    padding: 1%;
+    width: 300px;
+    text-align: center;
+}
+
 .opcoes__servicos{
     padding: 1% 5%;
 }
@@ -73,5 +79,11 @@
 }
 
 .atendimento__realizado{
-    color: green;
+    margin-top: 10px;
+    width: 200px;
+    text-align: center;
+}
+
+.list-group-item.botao__servico:hover {
+    background-color: #F8F9FA;
 }
