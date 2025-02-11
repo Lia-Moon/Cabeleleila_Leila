@@ -24,9 +24,24 @@
     </div>
     <div class="listagem__agendamentos__encontrados">
         <h3 class="listagem__agendamentos--existe">Agendamentos antigos</h3>
-        <h3 class="listagem__agendamentos--nao--existe">Sem agendamentos encontrados</h3>
+        <div class="container__agendamentos--antigos--encontrados">
+            <div class="container__agendamentos--filtro">
+                    <p>Filtre por data</p>
+                <div class="row">
+                    <p class="col-6 col-sm-3">Data Inicial</p>
+                    <input type="text" id="datepickerDataInicial" class="datepicker col-6 col-sm-3">
+                    <div class="w-100"></div>
+                    <p class="col-6 col-sm-3">Data Final</p>
+                    <input type="text" id="datepickerDataFinal" class="datepicker col-6 col-sm-3">
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="container__agendamentos--filtro--pesquisar">Pesquisar</button>
+            </div> 
+            <p class="listagem__agendamentos--nao--existe">Sem agendamentos encontrados</p>
+            <p class="agendamentos--antigos--filtrados">Agendamentos encontrados para as datas escolhidas</p>  
+        </div>     
+        <p class="agendamentos--antigos--encontrados">Todos os agendamentos antigos</p>   
         <div class="list-group" id="listagem__agendamentos">            
-        
+            <!-- Mostra os agendamentos encontrados/filtrados -->
         </div>
     </div>
 </body>

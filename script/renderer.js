@@ -107,6 +107,7 @@ $(function() {
             criarBotao.html(conteudoHtml);  
         });                    
 
+        //Inclui seletor de data na página de 'Agendar'
         $.datepicker.setDefaults($.datepicker.regional['pt-BR']);
 
         $('.custom-control-input').on("change", function(){
@@ -494,6 +495,66 @@ $(function() {
                 $(".listagem__agendamentos--nao--existe").show();
                 console.log("Não existe agendamento antigo");
             };
+
+            // Inclui seletor de data na página de histórico
+            $.datepicker.setDefaults($.datepicker.regional['pt-BR']);
+            $('.datepicker').datepicker({
+                showAnim: 'fadeIn',  
+                firstDay: 0,       
+                changeMonth: true,  
+                changeYear: true,                    
+            });
+
+            // Clicar no botão 'Pesquisar' na página de histórico
+            $("#container__agendamentos--filtro--pesquisar").on("click", async function(){
+                const dataFiltroInicial = $('#datepickerDataInicial').val(); 
+                const dataFiltroFinal = $('#datepickerDataFinal').val(); 
+                let validacaoDataFiltroInicial;
+                let validacaoDataFiltroFinal;
+
+                
+                if (dataFiltroInicial === "" || dataFiltroFinal === "") {
+                    console.log("Datas não selecionadas para filtro!");
+                    return;
+                }
+
+                let filtrarDadosPorData = await window.electronAPI.filtrarDadosPorData(formataStringAnoMesDia(dataFiltroInicial), formataStringAnoMesDia(dataFiltroFinal));
+                console.log("Datas selecionas para filtro:", dataFiltroInicial, dataFiltroFinal);
+                console.log("Dados trazidos:", filtrarDadosPorData);
+
+                var criarBotao = $("#listagem__agendamentos");
+                var conteudoHtml = '';
+
+                if(filtrarDadosPorData && filtrarDadosPorData.length > 0) {
+                    $(".listagem__agendamentos--existe").show();
+                    $(".listagem__agendamentos--nao--existe").hide();
+
+                    filtrarDadosPorData.forEach(function(item){
+                        conteudoHtml += `
+                                        <div class="list-group-item botao__servico" id="idServico${item.id}">
+                                            <div class="servico__informacoes">
+                                                ${item.servico}<br>Dia: ${formataStringDiaMesAno(item.data)} às ${item.hora}
+                                            </div>
+                                            <div class="informacao__adicional">
+                                                <p class="atendimento__realizado border border-success rounded text-success">Atendimento realizado</p>
+                                                <small>Local: Avenida das Flores, nº 156.<br></small>
+                                                <small>Telefone: (09) 827504594<br></small>                                                                                    
+                                            </div>
+                                        </div>
+                                        `;
+                    });
+                    criarBotao.html(conteudoHtml);  
+
+                    $("#listagem__agendamentos").off("click", ".botao__servico").on("click", ".botao__servico", function (event) {
+                        if ($(event.target).is("button")) {
+                            return;
+                        }
+                        $(this).find(".informacao__adicional").toggle();
+                    });
+
+                }
+
+            });            
         });
     };
 
@@ -514,6 +575,7 @@ $(function() {
                 return;
             }
 
+            // Inclui seletor de data na página de 'Editar Agendamento'
             $.datepicker.setDefaults($.datepicker.regional['pt-BR']);
 
             const dadosAgendamentoSelecionado = await window.electronAPI.procuraAgendamentoPorId(idAgendamentoClicadoEdicao);

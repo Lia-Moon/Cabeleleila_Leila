@@ -395,3 +395,41 @@ ipcMain.handle('editarAgendamentoPorId', async (event, AGENDAMENTOID, AGENDAMENT
     const resultado =  await editaAgendamentoPorId(AGENDAMENTOID, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO);
     return resultado;
 });
+
+// -------------- Busca dados com base no filtro de datas escolhido
+
+async function filtrarDadosPorData(dataInicial, dataFinal) {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    const busca = `SELECT * 
+                   FROM AGENDAMENTO 
+                   WHERE AGENDAMENTODATA BETWEEN ? AND ? 
+                   ORDER BY AGENDAMENTODATA ASC,
+                             AGENDAMENTOHORA ASC`;
+
+    const retornoBusca = await db.all(busca, [dataInicial, dataFinal]);
+
+    if(retornoBusca && retornoBusca.length > 0) {
+        const agendamentosEncontrados = retornoBusca.map(item => {
+            return {id: item.AGENDAMENTOID,
+                nome: item.AGENDAMENTOCPF, 
+                data: item.AGENDAMENTODATA,
+                hora: item.AGENDAMENTOHORA, 
+                servico: item.AGENDAMENTOSERVICO};
+        });
+        return agendamentosEncontrados;
+    } else {
+        return null;
+    }
+}
+
+ipcMain.handle('filtrarDadosPorData', async (event, dataInicial, dataFinal) => {
+    const resultado =  await filtrarDadosPorData(dataInicial, dataFinal);
+    return resultado;
+});
+
+
+
