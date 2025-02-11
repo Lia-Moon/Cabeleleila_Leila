@@ -1,4 +1,11 @@
 function formataStringAnoMesDia(data) {
+    if (typeof data !== "string") {
+        let dia = data.getDate();
+        let mes = data.getMonth() + 1; // 0 para janeiro, etc
+        let ano = data.getFullYear();
+        data = ("0" + dia).slice(-2) + "/" + ("0" + mes).slice(-2) + "/" + ano;
+    }   
+
     var dia  = data.split("/")[0];
     var mes  = data.split("/")[1];
     var ano  = data.split("/")[2];
@@ -7,6 +14,13 @@ function formataStringAnoMesDia(data) {
 }
 
 function formataStringDiaMesAno(data) {
+    if (typeof data !== "string") {
+        let dia  = data.getDate();
+        let mes  = data.getMonth() + 1;
+        let ano  = data.getFullYear();
+        return ("0" + dia).slice(-2) + '/' + ("0" + mes).slice(-2) + '/' + ano;
+    }
+
     var ano  = data.split("-")[0];
     var mes  = data.split("-")[1];
     var dia  = data.split("-")[2];
@@ -62,15 +76,9 @@ $(function() {
 
     // -------------- Página Agendar
     if(window.location.pathname.endsWith("agendar.html")){
-        $(".opcoes__servicos--corte__feminino").hide();
-        $(".opcoes__servicos--corte__masculino").hide();
-        $(".opcoes__servicos--tintura").hide();
-        $(".pendente__data--corte__feminino").hide();
-        $(".pendente__data--corte__masculino").hide();
-        $(".pendente__data--tintura").hide();
-        $(".pendente__horario--corte__feminino").hide();
-        $(".pendente__horario--corte__masculino").hide();
-        $(".pendente__horario--tintura").hide();
+        $(".pendente__data--erro--agendar").hide();
+        $(".pendente__horario--erro--agendar").hide();
+        $(".pendente__servico").hide();
         $(".agendamento__sucesso").hide();
         
         $(async function() {
@@ -85,30 +93,49 @@ $(function() {
 
             if(possuiAgendamentoMesmaSemana) {
                 console.log("Retorno do 1ª agendamento encontrado dos próximos 7 dias:", possuiAgendamentoMesmaSemana);
+                // Se existir agendamento para os próximos 7 dias
+                var criarBotao = $("#listagem__agendamentos__mesma__semana");
+                var conteudoHtml = '';
+
+                possuiAgendamentoMesmaSemana.forEach(function(item){
+                    conteudoHtml += `
+                                    <div class="agendamento__semana" id="idServico${item.id}">
+                                        <p>Foi encontrado esse serviço nos próximos dias<br>
+                                        Tente agendar o novo na mesma data em um horário próximo!</p>
+                                        <div class="border bg-light agendamento__semana--dados">
+                                            ${item.servico}<br>Dia: ${formataStringDiaMesAno(item.data)} às ${item.hora}
+                                        </div>
+                                    </div>
+                                    `;
+                });
             } else {
                 console.log("Sem valores encontrados:", possuiAgendamentoMesmaSemana);
             }
-
-            // Se existir agendamento para os próximos 7 dias
-            var criarBotao = $("#listagem__agendamentos__mesma__semana");
-            var conteudoHtml = '';
-
-            possuiAgendamentoMesmaSemana.forEach(function(item){
-                conteudoHtml += `
-                                <div class="agendamento__semana" id="idServico${item.id}">
-                                    <p>Foi encontrado esse seviço nos próximos dias<br>
-                                       Tente agendar o novo na mesma data em um horário próximo!</p>
-                                    <div class="border bg-light agendamento__semana--dados">
-                                        ${item.servico}<br>Dia: ${formataStringDiaMesAno(item.data)} às ${item.hora}
-                                    </div>
-                                </div>
-                                `;
-            });
+            
             criarBotao.html(conteudoHtml);  
-        });                    
+            
+            // Busca serviços cadastrados
+            var procuraServicosCadastrados = await window.electronAPI.procuraServicosCadastrados();
 
-        //Inclui seletor de data na página de 'Agendar'
-        $.datepicker.setDefaults($.datepicker.regional['pt-BR']);
+            if(procuraServicosCadastrados) {
+                console.log("Serviços encontrados:", procuraServicosCadastrados);
+            } else {
+                console.log("Sem serviços encontrados:", procuraServicosCadastrados);
+            }
+
+            // Cria o seletor de serviços
+            var mostrarSeletorServico = $("#dropdown__opcoes--servicos");
+            
+            var conteudoHtmlSeletorServicos = '';
+
+            procuraServicosCadastrados.forEach(function(item){
+                if(item.servico) {
+                    conteudoHtmlSeletorServicos += `<option value="${item.servico}">${item.servico}</option>`;   
+                }                             
+            });
+
+            mostrarSeletorServico.append(conteudoHtmlSeletorServicos); 
+        });                            
 
         $('.custom-control-input').on("change", function(){
             let id = this.id;
@@ -153,6 +180,9 @@ $(function() {
                     datasSemHorariosDisponiveis.push((data));
                 }
             });
+
+            //Inclui seletor de data na página de 'Agendar'
+            $.datepicker.setDefaults($.datepicker.regional['pt-BR']);
             
             $('.datepicker').datepicker({
                 showAnim: 'fadeIn',  
@@ -171,9 +201,10 @@ $(function() {
 
         atualizarDatasDisponiveis();
 
-        $('#datepickerfeminino, #datepickermasculino, #datepickertintura').on('change', async function() {
+        // Mostrar e atualiza opção de horário disponível
+        $('#datepicker__agendar').on('change', async function() {
             $(".agendamento__sucesso").hide();  
-            const dataEscolhida = $(this).val();
+            const dataEscolhida = formataStringAnoMesDia($("#datepicker__agendar").val());
             const usuarioLogado = sessionStorage.getItem('usuarioLogado');
             if(!usuarioLogado){
                 console.log("Sem usuário logado");
@@ -183,17 +214,25 @@ $(function() {
             var procuraQlqAgendamento = await window.electronAPI.procuraQlqAgendamento();
             // console.log("Qualquer agendamento (horários) encontrado:", procuraQlqAgendamento);
 
-            const dataEscolhidaFormatada = formataStringAnoMesDia(dataEscolhida);
-            const horariosOcupados = procuraQlqAgendamento.filter(item => item.data === dataEscolhidaFormatada).map(item => item.hora);
+            const horariosOcupados = procuraQlqAgendamento.filter(item => item.data === dataEscolhida).map(item => item.hora);
 
             const horariosPossiveis = ["", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
-            const campoIdAlterado = $(this).attr('id').replace('datepicker', 'horario__');
-            $(`#${campoIdAlterado}`).empty();
+            const campoIdAlterado = $("#horario__agendar");
+            campoIdAlterado.empty();
+            const hoje = new Date();
+            const horaAtual = hoje.getHours(); 
+            
+            const dataHojeFormatada = formataStringAnoMesDia(hoje);             
 
             horariosPossiveis.forEach(hora => {
+                const transformarTextParaHora = parseInt(hora.split(":")[0]);
+
+                if (dataEscolhida === dataHojeFormatada && transformarTextParaHora <= horaAtual){
+                    return;
+                }
                 if (!horariosOcupados.includes(hora)) {
-                    $(`#${campoIdAlterado}`).append(new Option(hora, hora));
+                    campoIdAlterado.append(new Option(hora, hora));
                 }
             });
         })
@@ -207,90 +246,54 @@ $(function() {
                 return;
             }
 
-            const selecionadoFeminino = $("#corte__feminino").is(':checked');
-            const selecionadoMasculino = $("#corte__masculino").is(':checked');
-            const selecionadoTintura = $("#tintura").is(':checked');
+            const selecionadoServicoAgendar = $("#dropdown__opcoes--servicos").val();
 
-            if(!selecionadoFeminino && !selecionadoMasculino && !selecionadoTintura) {
+            if(!selecionadoServicoAgendar) {
                 console.log("Nenhum serviço foi selecionado");
+                $(".pendente__servico").show();
                 return;
-            };
-
-            const verificarData = (selecionado, datepicker, mensagem) => {
-                if(selecionado) {
-                    if($(datepicker).val().trim() === ""){
-                        $(mensagem).show();
-                        return false;
-                    } else {
-                        $(mensagem).hide();
-                        return true;
-                    }
-                }
-                return true;
-            };
-
-            const verificarHora = (selecionado, horario, mensagem) => {
-                if(selecionado) {
-                    if($(horario).val().trim() === ""){
-                        $(mensagem).show();
-                        return false;
-                    } else {
-                        $(mensagem).hide();
-                        return true;
-                    }
-                }
-                return true;
-            };
-
-            let validacaoDataFeminino = verificarData(selecionadoFeminino, "#datepickerfeminino", ".pendente__data--corte__feminino");
-            let validacaoDataMasculino = verificarData(selecionadoMasculino, "#datepickermasculino", ".pendente__data--corte__masculino");
-            let validacaoDataTintura = verificarData(selecionadoTintura, "#datepickertintura", ".pendente__data--tintura");   
-
-            let validacaoHorarioFeminino = verificarHora(selecionadoFeminino, "#horario__feminino", ".pendente__horario--corte__feminino");
-            let validacaoHorarioMasculino = verificarHora(selecionadoMasculino, "#horario__masculino", ".pendente__horario--corte__masculino");
-            let validacaoHorarioTintura = verificarHora(selecionadoTintura, "#horario__tintura", ".pendente__horario--tintura");   
-            
-            if((selecionadoFeminino && !validacaoDataFeminino) ||
-                (selecionadoMasculino && !validacaoDataMasculino) ||
-                (selecionadoTintura && !validacaoDataTintura)) {
-                    // console.log("Algumas Datas não preenchidas", validacaoDataFeminino, validacaoDataMasculino, validacaoDataTintura);
-                    return;
+            } else {
+                $(".pendente__servico").hide();
             }
 
-            if((selecionadoFeminino && !validacaoHorarioFeminino) ||
-                (selecionadoMasculino && !validacaoHorarioMasculino) ||
-                (selecionadoTintura && !validacaoHorarioTintura)) {
-                    // console.log("Alguns Horários não preenchidas", validacaoDataFeminino, validacaoDataMasculino, validacaoDataTintura);
-                    return;
-            }    
+            const verificarHoraData = (datepicker, mensagem) => {
+                if($(datepicker).val().trim() === ""){
+                    $(mensagem).show();
+                    return false;
+                } else {
+                    $(mensagem).hide();
+                    return true;
+                }
+            };
+
+            let validacaoDataAgendar = verificarHoraData("#datepicker__agendar", ".pendente__data--erro--agendar");
+            let validacaoHorarioAgendar = verificarHoraData("#horario__agendar", ".pendente__horario--erro--agendar");
+            let validacaoServicoAgendar;
+
+            if(selecionadoServicoAgendar){
+                validacaoServicoAgendar = true;
+            } else {
+                validacaoServicoAgendar = false;
+            }
             
-            if (selecionadoFeminino && validacaoDataFeminino && validacaoHorarioFeminino) {
-                const dataCorteFeminino = $('#datepickerfeminino').val(); 
-                const horaCorteFeminino = $('#horario__feminino').val(); 
+            if((!validacaoHorarioAgendar || !validacaoDataAgendar)) {
+                // console.log("Algumas Datas/Horários não foram preenchidos", validacaoHorarioAgendar, validacaoDataAgendar);
+                return;
+            }  
+            
+            if (validacaoHorarioAgendar || validacaoDataAgendar || validacaoServicoAgendar) {
+
+                const dataCorteAgendar = $('#datepicker__agendar').val(); 
+                const horaCorteAgendar = $('#horario__agendar').val();                 
                 
-                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringAnoMesDia(dataCorteFeminino), horaCorteFeminino, 'Corte Feminino');
-                console.log("Dados do corte feminino enviados!");
-            }
-
-            if (selecionadoMasculino && validacaoDataMasculino && validacaoHorarioMasculino) {
-                const dataCorteMasculino = $('#datepickermasculino').val(); 
-                const horaCorteMasculino = $('#horario__masculino').val(); 
-                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringAnoMesDia(dataCorteMasculino), horaCorteMasculino, 'Corte Masculino');
-                console.log("Dados do corte masculino enviados!");
-            }
-
-            if (selecionadoTintura && validacaoDataTintura && validacaoHorarioTintura) {
-                const dataCorteTintura = $('#datepickertintura').val(); 
-                const horaCorteTintura = $('#horario__tintura').val(); 
-
-                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringAnoMesDia(dataCorteTintura), horaCorteTintura, 'Tintura');
-                console.log("Dados da tintura enviados!");
+                await window.electronAPI.inserirAgendamento(usuarioLogado, formataStringAnoMesDia(dataCorteAgendar), horaCorteAgendar, selecionadoServicoAgendar);
+                console.log("Dados enviados!");
             }
 
             $(".agendamento__sucesso").show();
-            $('.opcoes__servicos input').each(function(){
-                $(this).val('');
-            });
+            $('#dropdown__opcoes--servicos').val('');
+            $('#datepicker__agendar').val('');
+            $('#horario__agendar').val('');
         });
     }
 
@@ -714,11 +717,11 @@ $(function() {
             const servicoSelecionado = $("#opcao__servico--edicao").val();
 
             if(servicoSelecionado === "") {
-                console.log("Seviço não selecionado");
+                console.log("Serviço não selecionado");
                 $(".pendente__servico").show(); 
                 validacaoServico = false;
             } else {
-                console.log("Seviço selecionado");
+                console.log("Serviço selecionado");
                 $(".pendente__servico").hide(); 
                 validacaoServico = true;
             }

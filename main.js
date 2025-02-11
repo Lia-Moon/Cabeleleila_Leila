@@ -136,6 +136,38 @@ async function deletarRegistroTabelaAgendamento(AGENDAMENTOID) {
 
 criarTabelaAgendamento();
 
+
+// -------------- Tabela Serviços Oferecidos
+
+async function criarTabelaServico() {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    // await db.run('DROP TABLE IF EXISTS USUARIO'); // Deleta a tabela de usuário
+
+    await db.run(`CREATE TABLE IF NOT EXISTS SERVICO (
+        SERVICOID INTEGER NOT NULL PRIMARY KEY, 
+        SERVICONOME VARCHAR(20) NOT NULL
+    )`);  
+}
+
+criarTabelaServico();
+
+async function inserirRegistroTabelaServicos(SERVICONOME) {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+    
+    await db.run('INSERT INTO SERVICO (SERVICONOME) VALUES (?)', [
+        SERVICONOME,
+    ]);
+    console.log(`Registro do servico ${SERVICONOME} inserido com sucesso.`);
+}
+
+// ---------------------- Funções
 async function inserirAgendamento(usuario, data, hora, servico) {
     const db = await open({
         filename: 'banco/banco.db',
@@ -282,15 +314,6 @@ async function procuraAgendamentoAntigo(AGENDAMENTOCPF) {
                 hora: item.AGENDAMENTOHORA, 
                 servico: item.AGENDAMENTOSERVICO};
         });
-        /* agendamentosEncontrados.sort(function(a,b) {
-            if (a.data === b.data) {
-                agendamentosEncontrados.sort(function(a,b) {
-                    return b.hora.localeCompare(a.hora);
-                });
-            } else {
-                return b.data.localeCompare(a.data);
-            }
-        }); */
         return agendamentosEncontrados;
     } else {
         return null;
@@ -312,7 +335,8 @@ async function procuraAgendamentoMesmaSemana(AGENDAMENTOCPF) {
 
     const busca = `SELECT * 
                    FROM AGENDAMENTO 
-                   WHERE AGENDAMENTOCPF = ? AND (AGENDAMENTODATA BETWEEN DATE('now') AND DATE('now', '+7 days')) 
+                   WHERE AGENDAMENTOCPF = ? AND (AGENDAMENTODATA BETWEEN DATE('now') AND DATE('now', '+7 days'))
+                                            AND AGENDAMENTODATA || ' ' || AGENDAMENTOHORA > DATETIME('now')
                    ORDER BY AGENDAMENTODATA ASC,
                              AGENDAMENTOHORA ASC
                    LIMIT 1`;
@@ -430,6 +454,38 @@ ipcMain.handle('filtrarDadosPorData', async (event, dataInicial, dataFinal) => {
     const resultado =  await filtrarDadosPorData(dataInicial, dataFinal);
     return resultado;
 });
+
+
+// -------------- Busca de serviços cadastrados
+
+async function procuraServicosCadastrados() {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    const busca = `SELECT * 
+                   FROM SERVICO`;
+
+    const retornoBusca = await db.all(busca);
+
+    if(retornoBusca && retornoBusca.length > 0) {
+        const servicosEncontrados = retornoBusca.map(item => {
+            return {id: item.SERVICOID,
+                servico: item.SERVICONOME};
+        });
+        servicosEncontrados.sort();
+        return servicosEncontrados;
+    } else {
+        return null;
+    }
+}
+
+ipcMain.handle('procuraServicosCadastrados', async (event) => {
+    const resultado =  await procuraServicosCadastrados();
+    return resultado;
+});
+
 
 
 

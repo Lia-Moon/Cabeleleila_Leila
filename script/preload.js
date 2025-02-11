@@ -13,4 +13,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     procuraAgendamentoPorId: (idAgendamento) => ipcRenderer.invoke('idAgendamentoClicadoEdicao', idAgendamento),
     editarAgendamentoPorId: (id, data, hora, servico) => ipcRenderer.invoke('editarAgendamentoPorId', id, data, hora, servico),
     filtrarDadosPorData: (dataInicial, dataFinal) => ipcRenderer.invoke('filtrarDadosPorData', dataInicial, dataFinal),
+    procuraServicosCadastrados: () => ipcRenderer.invoke('procuraServicosCadastrados'),
 });
