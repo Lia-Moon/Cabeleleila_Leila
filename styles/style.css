@@ -87,3 +87,12 @@
 .list-group-item.botao__servico:hover {
     background-color: #F8F9FA;
 }
+
+/* ---- Página Editar Agendamento ---- */
+.editar__agendamento, .cancelar__agendamento {
+    width: 90px;
+}
+
+.cancelar__agendamento {
+    margin-left: 20px;
+}

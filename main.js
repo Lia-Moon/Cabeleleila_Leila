@@ -336,3 +336,62 @@ ipcMain.handle('existeAgendamentoMesmaSemana', async (event, AGENDAMENTOCPF) => 
     const resultado =  await procuraAgendamentoMesmaSemana(AGENDAMENTOCPF);
     return resultado;
 });
+
+// -------------- Busca dados do agendamento por ID pesquisado
+
+async function procuraidAgendamentoClicadoEdicao(AGENDAMENTOID) {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    const busca = `SELECT * 
+                   FROM AGENDAMENTO 
+                   WHERE AGENDAMENTOID = ?
+                   LIMIT 1`;
+    const retornoBusca = await db.all(busca, [AGENDAMENTOID]);
+
+    if(retornoBusca && retornoBusca.length > 0) {
+        const agendamentosEncontrados = retornoBusca.map(item => {
+            return {id: item.AGENDAMENTOID,
+                nome: item.AGENDAMENTOCPF, 
+                data: item.AGENDAMENTODATA,
+                hora: item.AGENDAMENTOHORA, 
+                servico: item.AGENDAMENTOSERVICO};
+        });
+        return agendamentosEncontrados;
+    } else {
+        return null;
+    }
+}
+
+ipcMain.handle('idAgendamentoClicadoEdicao', async (event, AGENDAMENTOID) => {
+    const resultado =  await procuraidAgendamentoClicadoEdicao(AGENDAMENTOID);
+    return resultado;
+});
+
+
+// -------------- EDITAR dados do agendamento por ID
+
+async function editaAgendamentoPorId(AGENDAMENTOID, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO) {
+    const db = await open({
+        filename: 'banco/banco.db',
+        driver: sqlite3.Database,
+    });
+
+    const editado = await db.run(`UPDATE AGENDAMENTO 
+                SET AGENDAMENTODATA = ?, AGENDAMENTOHORA = ?, AGENDAMENTOSERVICO = ?
+                WHERE AGENDAMENTOID = ?`, [AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO, AGENDAMENTOID]);
+
+    if(editado.changes > 0) {
+        console.log(`Registro com ID ${AGENDAMENTOID} alterado com sucesso.`);
+        return true;
+    } else {
+        return false;
+    }     
+}
+
+ipcMain.handle('editarAgendamentoPorId', async (event, AGENDAMENTOID, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO) => {
+    const resultado =  await editaAgendamentoPorId(AGENDAMENTOID, AGENDAMENTODATA, AGENDAMENTOHORA, AGENDAMENTOSERVICO);
+    return resultado;
+});

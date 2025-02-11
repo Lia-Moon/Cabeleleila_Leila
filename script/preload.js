@@ -10,4 +10,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     procuraQlqAgendamento: () => ipcRenderer.invoke('procuraQlqAgendamento'),
     excluirIdAgendamento: (idAgendamento) => ipcRenderer.invoke('excluirIdAgendamento', idAgendamento),
     existeAgendamentoAntigo: (usuario) => ipcRenderer.invoke('existeAgendamentoAntigo', usuario),
+    procuraAgendamentoPorId: (idAgendamento) => ipcRenderer.invoke('idAgendamentoClicadoEdicao', idAgendamento),
+    editarAgendamentoPorId: (id, data, hora, servico) => ipcRenderer.invoke('editarAgendamentoPorId', id, data, hora, servico),
 });

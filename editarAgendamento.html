@@ -11,8 +11,8 @@
 <body>
     <div class="menu__header">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-secondary active">
-                <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off" checked> Agendar
+            <label class="btn btn-secondary">
+                <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off"> Agendar
             </label>
             <label class="btn btn-secondary">
                 <input type="radio" name="opcao" id="paginaProximos" autocomplete="off"> Próximos Agendamentos
@@ -24,11 +24,11 @@
     </div>  
     
     <div class="opcoes__servicos">        
-        <h3>Agende um serviço</h3>
+        <h3>Editando agendamento</h3>
         <div id="listagem__agendamentos__mesma__semana">          
             <!-- Lista os agendamentos encontrados na mesma semana aqui -->  
         </div>
-        <p>Escolha um ou mais de nossos serviços</p>
+        <!-- <p>Escolha um ou mais de nossos serviços</p>
         <div class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" id="corte__feminino">
             <label class="custom-control-label" for="corte__feminino">Corte de Cabelo Feminino</label>
@@ -40,28 +40,11 @@
         <div class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" id="tintura">
             <label class="custom-control-label" for="tintura">Tintura</label>
-        </div>
-        <div class="opcoes__servicos--corte__feminino">
-            <p>Escolha um horário para o Corte Feminino</p>
-            <input type="text" id="datepickerfeminino" class="datepicker">
-            <select id="horario__feminino" name="horario">
-                <option value=""></option>
-                <option value="08:00">08:00</option>
-                <option value="09:00">09:00</option>
-                <option value="10:00">10:00</option>
-                <option value="11:00">11:00</option>
-                <option value="12:00">12:00</option>
-                <option value="13:00">13:00</option>
-                <option value="14:00">14:00</option>
-                <option value="15:00">15:00</option>
-                <option value="16:00">16:00</option>
-                <option value="17:00">17:00</option>                
-            </select>
-            </div>
-        <div class="opcoes__servicos--corte__masculino">
-            <p>Escolha um horário para o Corte Masculino</p>
-            <input type="text" id="datepickermasculino" class="datepicker">
-            <select id="horario__masculino" name="horario">
+        </div> -->
+        <div class="opcoes__servicos--datahora">
+            <p>Escolha um novo horário</p>
+            <input type="text" id="datepickerEdicao" class="datepicker">
+            <select id="horario__edicao" name="horario">
                 <option value=""></option>
                 <option value="08:00">08:00</option>
                 <option value="09:00">09:00</option>
@@ -75,34 +58,23 @@
                 <option value="17:00">17:00</option>                
             </select>
         </div>
-        <div class="opcoes__servicos--tintura">
-            <p>Escolha um horário para a Tintura</p>
-            <input type="text" id="datepickertintura" class="datepicker">
-            <select id="horario__tintura" name="horario">
+        <div>
+            <p>Selecione o serviço</p>
+            <select id="opcao__servico--edicao" name="servico">
                 <option value=""></option>
-                <option value="08:00">08:00</option>
-                <option value="09:00">09:00</option>
-                <option value="10:00">10:00</option>
-                <option value="11:00">11:00</option>
-                <option value="12:00">12:00</option>
-                <option value="13:00">13:00</option>
-                <option value="14:00">14:00</option>
-                <option value="15:00">15:00</option>
-                <option value="16:00">16:00</option>
-                <option value="17:00">17:00</option>                
+                <option value="Corte Feminino">Corte Feminino</option>
+                <option value="Corte Masculino">Corte Masculino</option>
+                <option value="Tintura">Tintura</option>              
             </select>
         </div>
-        <div class="mensagens__pendente">
-            <small class="pendente__data--corte__feminino">Inclua a data desejada para o corte feminino.<br></small>     
-            <small class="pendente__data--corte__masculino">Inclua a data desejada para o corte masculino.<br></small>   
-            <small class="pendente__data--tintura">Inclua a data desejada para a tintura.<br></small>   
-
-            <small class="pendente__horario--corte__feminino">Inclua o horário desejado para o corte feminino.<br></small>     
-            <small class="pendente__horario--corte__masculino">Inclua o horário desejado para o corte masculino.<br></small>   
-            <small class="pendente__horario--tintura">Inclua o horário desejado para a tintura.<br></small> 
+        <div class="mensagens__pendente">            
+            <small class="pendente__data--erro">Inclua a nova data desejada.<br></small>     
+            <small class="pendente__horario--erro">Inclua o novo horário desejado.<br></small>    
+            <small class="pendente__servico">Selecione o nome do serviço.<br></small> 
         </div>            
-        <small class="agendamento__sucesso">Agendamento registrado com sucesso.<br></small>   
-        <button class="agendar btn btn-secondary" type="button" id="opcoes__servicos--botao--agendar">Agendar</button>
+        <small class="agendamento__sucesso">Agendamento editado com sucesso.<br></small>   
+        <button class="editar__agendamento btn btn-secondary" type="button" id="botao__salvar__agendamento">Salvar</button>
+        <button class="cancelar__agendamento btn btn-secondary" type="button" id="botao__cancelar__agendamento">Cancelar</button>
     </div>
     
 </body>
