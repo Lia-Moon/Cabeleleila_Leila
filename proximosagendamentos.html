@@ -9,18 +9,19 @@
     <link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
-    <div class="menu__header">
+    <div class="menu__header d-flex align-items-center">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-secondary">
-                <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off"> Agendar
-            </label>
             <label class="btn btn-secondary active">
-                <input type="radio" name="opcao" id="paginaProximos" autocomplete="off" checked> Próximos Agendamentos
+                <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off" checked> Agendar
+            </label>
+            <label class="btn btn-secondary">
+                <input type="radio" name="opcao" id="paginaProximos" autocomplete="off"> Próximos Agendamentos
             </label>
             <label class="btn btn-secondary">
                 <input type="radio" name="opcao" id="paginaHistorico" autocomplete="off"> Histórico
             </label>
         </div>
+        <button type="button" class="btn btn-secondary ms-4" id="realizarLogout">Sair</button>
     </div>
     <div class="listagem__agendamentos__encontrados">
         <h3 class="listagem__agendamentos--existe">Próximos Agendamentos</h3>

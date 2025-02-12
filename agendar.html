@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
-    <div class="menu__header">
+    <div class="menu__header d-flex align-items-center">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
             <label class="btn btn-secondary active">
                 <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off" checked> Agendar
@@ -21,8 +21,8 @@
                 <input type="radio" name="opcao" id="paginaHistorico" autocomplete="off"> Histórico
             </label>
         </div>
-    </div>  
-    
+        <button type="button" class="btn btn-secondary ms-4" id="realizarLogout">Sair</button>
+    </div>      
     <div class="opcoes__servicos">        
         <h3>Agende um serviço</h3>
         <div id="listagem__agendamentos__mesma__semana">          
@@ -32,7 +32,7 @@
         <div id="dropdown__opcoes">
             <div >
                 <select id="dropdown__opcoes--servicos" name="servico">
-                    <option value="">Selecione um serviço</option>
+                    <option value="Servico">Selecione um serviço</option>
                     <!-- Opções de serviços aparecem aqui --> 
                 </select>
             </div>
@@ -55,9 +55,10 @@
             </select>
         </div>
         <div class="mensagens__pendente">            
-            <small class="pendente__data--erro--agendar">Inclua a nova data desejada.<br></small>     
+            <small class="pendente__data--erro--agendar">Inclua a nova data desejada.<br></small>
+            <small class="pendente__data--incorreta--agendar">Inclua uma data como no exemplo: 01/01/2025.<br></small>      
             <small class="pendente__horario--erro--agendar">Inclua o novo horário desejado.<br></small>    
-            <small class="pendente__servico">Selecione o nome do serviço.<br></small> 
+            <small class="pendente__servico">Selecione o nome do serviço.<br></small>             
         </div>        
         <small class="agendamento__sucesso">Agendamento registrado com sucesso.<br></small>   
         <button class="agendar btn btn-secondary" type="button" id="opcoes__servicos--botao--agendar">Agendar</button>

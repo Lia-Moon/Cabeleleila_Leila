@@ -25,9 +25,6 @@ app.whenReady().then(() => {
     });
 
     mainWindow.loadFile('index.html');
-    mainWindow.webContents.once('did-finish-load', () => {
-        mainWindow.webContents.openDevTools();
-    });
 });
 
 // -------------- Tabela Usuário
@@ -305,7 +302,6 @@ async function procuraAgendamentoAntigo(AGENDAMENTOCPF) {
                    ORDER BY AGENDAMENTODATA DESC,
                             AGENDAMENTOHORA DESC`;
     const retornoBusca = await db.all(busca, [AGENDAMENTOCPF]);
-
     if(retornoBusca && retornoBusca.length > 0) {
         const agendamentosEncontrados = retornoBusca.map(item => {
             return {id: item.AGENDAMENTOID,
@@ -316,12 +312,14 @@ async function procuraAgendamentoAntigo(AGENDAMENTOCPF) {
         });
         return agendamentosEncontrados;
     } else {
-        return null;
+        return [];
     }
 }
 
 ipcMain.handle('existeAgendamentoAntigo', async (event, AGENDAMENTOCPF) => {
+    console.log("CPF recebido no processo principal:", AGENDAMENTOCPF);
     const resultado =  await procuraAgendamentoAntigo(AGENDAMENTOCPF);
+    console.log("Retorno da função procuraAgendamentoAntigo (antes de enviar ao renderer):", resultado);
     return resultado;
 });
 
@@ -469,6 +467,8 @@ async function procuraServicosCadastrados() {
 
     const retornoBusca = await db.all(busca);
 
+    console.log("Retorno da busca no banco:", retornoBusca);
+
     if(retornoBusca && retornoBusca.length > 0) {
         const servicosEncontrados = retornoBusca.map(item => {
             return {id: item.SERVICOID,
@@ -477,7 +477,7 @@ async function procuraServicosCadastrados() {
         servicosEncontrados.sort();
         return servicosEncontrados;
     } else {
-        return null;
+        return [];
     }
 }
 

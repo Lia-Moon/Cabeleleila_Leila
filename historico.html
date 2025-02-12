@@ -9,37 +9,43 @@
     <link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
-    <div class="menu__header">
+    <div class="menu__header d-flex align-items-center">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-secondary">
-                <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off"> Agendar
+            <label class="btn btn-secondary active">
+                <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off" checked> Agendar
             </label>
             <label class="btn btn-secondary">
                 <input type="radio" name="opcao" id="paginaProximos" autocomplete="off"> Próximos Agendamentos
             </label>
-            <label class="btn btn-secondary active">
-                <input type="radio" name="opcao" id="paginaHistorico" autocomplete="off" checked> Histórico
+            <label class="btn btn-secondary">
+                <input type="radio" name="opcao" id="paginaHistorico" autocomplete="off"> Histórico
             </label>
         </div>
+        <button type="button" class="btn btn-secondary ms-4" id="realizarLogout">Sair</button>
     </div>
     <div class="listagem__agendamentos__encontrados">
         <h3 class="listagem__agendamentos--existe">Agendamentos antigos</h3>
         <div class="container__agendamentos--antigos--encontrados">
             <div class="container__agendamentos--filtro">
                     <p>Filtre por data</p>
-                <div class="row">
-                    <p class="col-6 col-sm-3">Data Inicial</p>
-                    <input type="text" id="datepickerDataInicial" class="datepicker col-6 col-sm-3">
-                    <div class="w-100"></div>
-                    <p class="col-6 col-sm-3">Data Final</p>
-                    <input type="text" id="datepickerDataFinal" class="datepicker col-6 col-sm-3">
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default inicial">Data Inicial</span>
+                    </div>                    
+                    <input type="text" id="datepickerDataInicial" class="datepicker form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+                </div> 
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-default final">Data Final</span>
+                    </div> 
+                    <input type="text" id="datepickerDataFinal" class="datepicker form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
                 </div>
                 <button type="button" class="btn btn-secondary btn-sm" id="container__agendamentos--filtro--pesquisar">Pesquisar</button>
             </div> 
             <p class="listagem__agendamentos--nao--existe">Sem agendamentos encontrados</p>
-            <p class="agendamentos--antigos--filtrados">Agendamentos encontrados para as datas escolhidas</p>  
-        </div>     
-        <p class="agendamentos--antigos--encontrados">Todos os agendamentos antigos</p>   
+        </div>    
+        <p class="agendamentos--antigos--encontrados">Agendamentos encontrados</p>    
         <div class="list-group" id="listagem__agendamentos">            
             <!-- Mostra os agendamentos encontrados/filtrados -->
         </div>

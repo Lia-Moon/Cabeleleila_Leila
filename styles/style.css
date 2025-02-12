@@ -96,3 +96,25 @@
 .cancelar__agendamento {
     margin-left: 20px;
 }
+
+#dropdown__opcoes--editar {
+    margin-top: 20px;
+}
+
+/* ---- Página Histórico ---- */
+
+.listagem__agendamentos__encontrados {
+    max-width: 700px;
+}
+.container__agendamentos--filtro { 
+    margin: 20px 0 20px 0;
+    max-width: 400px;
+}
+
+#container__agendamentos--filtro--pesquisar{
+    margin: 5px 0 5px 0;
+}
+
+#listagem__agendamentos{ /* afeta das páginas 'próximos agendamentos' e 'histórico */
+    margin-bottom: 50px;
+}

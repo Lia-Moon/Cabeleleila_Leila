@@ -9,10 +9,10 @@
     <link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
-    <div class="menu__header">
+    <div class="menu__header d-flex align-items-center">
         <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-secondary">
-                <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off"> Agendar
+            <label class="btn btn-secondary active">
+                <input type="radio" name="opcao" id="paginaAgendar" autocomplete="off" checked> Agendar
             </label>
             <label class="btn btn-secondary">
                 <input type="radio" name="opcao" id="paginaProximos" autocomplete="off"> Próximos Agendamentos
@@ -21,29 +21,25 @@
                 <input type="radio" name="opcao" id="paginaHistorico" autocomplete="off"> Histórico
             </label>
         </div>
-    </div>  
+        <button type="button" class="btn btn-secondary ms-4" id="realizarLogout">Sair</button>
+    </div> 
     
     <div class="opcoes__servicos">        
         <h3>Editando agendamento</h3>
         <div id="listagem__agendamentos__mesma__semana">          
             <!-- Lista os agendamentos encontrados na mesma semana aqui -->  
         </div>
-        <!-- <p>Escolha um ou mais de nossos serviços</p>
-        <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="corte__feminino">
-            <label class="custom-control-label" for="corte__feminino">Corte de Cabelo Feminino</label>
+        <div id="dropdown__opcoes--editar">
+            <div >
+                <select id="dropdown__opcoes--servicos--editar" name="servico">
+                    <option value="">Selecione um serviço</option>
+                    <!-- Opções de serviços aparecem aqui --> 
+                </select>
+            </div>
         </div>
-        <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="corte__masculino">
-            <label class="custom-control-label" for="corte__masculino">Corte de Cabelo Masculino</label>
-        </div>
-        <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="tintura">
-            <label class="custom-control-label" for="tintura">Tintura</label>
-        </div> -->
         <div class="opcoes__servicos--datahora">
             <p>Escolha um novo horário</p>
-            <input type="text" id="datepickerEdicao" class="datepicker">
+            <input type="text" id="datepicker__edicao" class="datepicker">
             <select id="horario__edicao" name="horario">
                 <option value=""></option>
                 <option value="08:00">08:00</option>
@@ -58,17 +54,9 @@
                 <option value="17:00">17:00</option>                
             </select>
         </div>
-        <div>
-            <p>Selecione o serviço</p>
-            <select id="opcao__servico--edicao" name="servico">
-                <option value=""></option>
-                <option value="Corte Feminino">Corte Feminino</option>
-                <option value="Corte Masculino">Corte Masculino</option>
-                <option value="Tintura">Tintura</option>              
-            </select>
-        </div>
         <div class="mensagens__pendente">            
-            <small class="pendente__data--erro">Inclua a nova data desejada.<br></small>     
+            <small class="pendente__data--erro">Inclua a nova data desejada.<br></small> 
+            <small class="pendente__data--incorreta">Inclua uma data como no exemplo: 01/01/2025.<br></small>      
             <small class="pendente__horario--erro">Inclua o novo horário desejado.<br></small>    
             <small class="pendente__servico">Selecione o nome do serviço.<br></small> 
         </div>            
