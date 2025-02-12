@@ -467,8 +467,6 @@ async function procuraServicosCadastrados() {
 
     const retornoBusca = await db.all(busca);
 
-    console.log("Retorno da busca no banco:", retornoBusca);
-
     if(retornoBusca && retornoBusca.length > 0) {
         const servicosEncontrados = retornoBusca.map(item => {
             return {id: item.SERVICOID,
