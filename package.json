@@ -19,7 +19,8 @@
   "homepage": "https://github.com/Lia-Moon/Cabeleleila_Leila#readme",
   "description": "",
   "devDependencies": {
-    "electron": "^34.1.1"
+    "electron": "^34.1.1",
+    "electron-packager": "^17.1.2"
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
